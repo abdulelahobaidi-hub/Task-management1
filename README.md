@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/31588623/README.md)
 # نظام إدارة المهام — قسم المشتريات
 
 موقع ويب مبني من ملف `Task_Management.xlsx`، بنفس أعمدته وقوائمه ومنطق حساب تاريخ الاستحقاق.
