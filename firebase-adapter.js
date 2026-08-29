@@ -17,12 +17,12 @@
 const SDK = "https://www.gstatic.com/firebasejs/11.0.2";
 
 const FIREBASE_CONFIG = {
-  apiKey:            "PASTE_HERE",
-  authDomain:        "PASTE_HERE",
-  projectId:         "PASTE_HERE",
-  storageBucket:     "PASTE_HERE",
-  messagingSenderId: "PASTE_HERE",
-  appId:             "PASTE_HERE"
+  apiKey:            "AIzaSyBR4gOqGFHOiYsv3gEuws_Ojo52cPooqks",
+  authDomain:        "task-management1-d1c3f.firebaseapp.com",
+  projectId:         "task-management1-d1c3f",
+  storageBucket:     "task-management1-d1c3f.firebasestorage.app",
+  messagingSenderId: "520378911475",
+  appId:             "1:520378911475:web:a7bbb130475e2c971d0586"
 };
 
 /* Change this if you ever want a second, separate department board
