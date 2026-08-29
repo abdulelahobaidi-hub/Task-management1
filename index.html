@@ -1,0 +1,1133 @@
+[index.html](https://github.com/user-attachments/files/31588619/index.html)
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>نظام إدارة المهام — قسم المشتريات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#101D29; --ink-2:#1B2C3D; --paper:#EDF1F4; --card:#FFFFFF;
+  --line:#D6DEE6; --line-2:#E8EDF1; --muted:#5F7386; --text:#16232E;
+  --brand:#C8102E; --brand-dark:#9C0C24; --blue:#1B6E8C;
+  --s-not:#7B8CA0; --s-prog:#B87503; --s-done:#1B7A4B; --s-late:#C8102E; --s-hold:#6B5F92;
+  --p1:#C8102E; --p2:#D9730D; --p3:#1B6E8C; --p4:#4E7A3A; --p5:#7B8CA0;
+  --font-ar:'IBM Plex Sans Arabic',system-ui,'Segoe UI',sans-serif;
+  --font-en:'IBM Plex Sans',system-ui,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  --r:6px; --sh:0 1px 2px rgba(16,29,41,.06),0 4px 14px rgba(16,29,41,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--text);
+  font-family:var(--font-ar); font-size:14px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+html[lang="en"] body{font-family:var(--font-en)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:var(--blue)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+[hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+
+/* ---------- LOGIN ---------- */
+#login{min-height:100dvh;display:grid;grid-template-columns:1.05fr .95fr}
+.lg-brand{
+  background:var(--ink); color:#fff; padding:48px 44px; display:flex;
+  flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;
+}
+.lg-brand::before{
+  content:"";position:absolute;inset:0;opacity:.16;
+  background-image:linear-gradient(rgba(255,255,255,.28) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.28) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:radial-gradient(circle at 70% 30%,#000,transparent 72%);
+}
+.lg-brand>*{position:relative}
+.mark{display:flex;align-items:center;gap:12px}
+.mark-badge{
+  width:42px;height:42px;border-radius:5px;background:var(--brand);
+  display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.5px;color:#fff;
+}
+.mark-t{font-weight:600;font-size:14px;letter-spacing:.02em}
+.mark-s{font-size:12px;color:#93A7B8}
+.lg-hero h1{font-size:clamp(26px,3.4vw,40px);line-height:1.25;margin:0 0 14px;font-weight:600;letter-spacing:-.01em}
+.lg-hero p{color:#A7BACA;max-width:44ch;margin:0;font-size:14px}
+.lg-stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:30px}
+.lg-stat b{display:block;font-family:var(--mono);font-size:24px;font-weight:500;color:#fff}
+.lg-stat span{font-size:11.5px;color:#8FA5B7;letter-spacing:.06em;text-transform:uppercase}
+.lg-foot{font-size:11.5px;color:#7A8FA2}
+
+.lg-form{display:flex;align-items:center;justify-content:center;padding:40px 32px;background:var(--card)}
+.lg-box{width:100%;max-width:370px}
+.lg-box h2{margin:0 0 4px;font-size:20px;font-weight:600}
+.lg-box .sub{color:var(--muted);margin:0 0 26px;font-size:13px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:5px}
+.inp,select.inp,textarea.inp{
+  width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--r);
+  background:#fff;transition:border-color .12s,box-shadow .12s;
+}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,110,140,.12);outline:none}
+select.inp{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(0% + 14px) 50%,calc(0% + 19px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-inline-start:32px}
+html[dir="ltr"] select.inp{background-position:calc(100% - 19px) 50%,calc(100% - 14px) 50%;padding-inline-start:11px;padding-inline-end:32px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:9px 16px;border-radius:var(--r);font-weight:500;font-size:13.5px;
+  background:var(--ink);color:#fff;transition:background .12s,transform .06s;
+}
+.btn:hover{background:var(--ink-2)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--brand)}.btn-primary:hover{background:var(--brand-dark)}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+.btn-ghost:hover{background:var(--line-2)}
+.btn-danger{background:#fff;border:1px solid #E7B9C1;color:var(--brand)}
+.btn-danger:hover{background:#FCEEF0}
+.btn-block{width:100%;padding:11px}
+.btn-sm{padding:6px 11px;font-size:12.5px}
+.err{background:#FCEEF0;border:1px solid #EFC2CB;color:var(--brand-dark);padding:8px 11px;border-radius:var(--r);font-size:12.5px;margin-bottom:12px}
+.hint{margin-top:22px;padding-top:16px;border-top:1px solid var(--line-2);font-size:12px;color:var(--muted);line-height:1.7}
+.hint code{font-family:var(--mono);background:var(--line-2);padding:1px 5px;border-radius:3px;font-size:11.5px}
+@media(max-width:860px){#login{grid-template-columns:1fr}.lg-brand{padding:28px 22px;gap:26px}.lg-hero h1{font-size:24px}.lg-stats{gap:20px}}
+
+/* ---------- SHELL ---------- */
+.topbar{
+  background:var(--ink);color:#fff;padding:0 20px;display:flex;align-items:center;
+  gap:14px;height:56px;position:sticky;top:0;z-index:40;flex-wrap:nowrap;
+}
+.topbar .mark{min-width:0}
+.topbar .mark>div{min-width:0}
+.tb-title{font-weight:600;font-size:13.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-btn{flex:0 0 auto}
+.tb-sub{font-size:11px;color:#8FA5B7}
+.tb-spacer{flex:1}
+.tb-btn{color:#B9CAD8;padding:6px 10px;border-radius:var(--r);font-size:12.5px;border:1px solid rgba(255,255,255,.14)}
+.tb-btn:hover{background:rgba(255,255,255,.09);color:#fff}
+.chip-user{display:flex;align-items:center;gap:9px;padding:4px 10px 4px 4px;border-radius:99px;background:rgba(255,255,255,.09)}
+html[dir="ltr"] .chip-user{padding:4px 4px 4px 10px}
+.avatar{width:28px;height:28px;border-radius:99px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600;flex:0 0 auto;letter-spacing:.02em}
+.chip-user .nm{font-size:12.5px;font-weight:500;line-height:1.1}
+.chip-user .rl{font-size:10.5px;color:#93A7B8}
+.tabs{background:var(--card);border-bottom:1px solid var(--line);padding:0 20px;display:flex;gap:2px;position:sticky;top:56px;z-index:35;overflow-x:auto}
+.tab{padding:12px 14px;font-size:13.5px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;font-weight:500}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand)}
+main{padding:22px 20px 60px;max-width:1440px;margin:0 auto}
+.page-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.page-head h2{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.page-head p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+.grow{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.card-h{padding:13px 16px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:10px}
+.card-h h3{margin:0;font-size:13.5px;font-weight:600}
+.card-h .note{font-size:11.5px;color:var(--muted)}
+.card-b{padding:16px}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:3px;background:var(--c,var(--line))}
+.kpi .lbl{font-size:11.5px;color:var(--muted);letter-spacing:.03em}
+.kpi .val{font-family:var(--mono);font-size:27px;font-weight:500;line-height:1.15;margin-top:3px}
+.kpi .sub{font-size:11px;color:var(--muted)}
+
+/* ---------- WORKLOAD (signature) ---------- */
+.wl-row{display:grid;grid-template-columns:112px 1fr 54px;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.wl-row:last-child{border-bottom:none}
+.wl-name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;min-width:0}
+.wl-name .avatar{width:24px;height:24px;font-size:10.5px;background:var(--ink-2)}
+.wl-name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wl-bar{height:22px;background:repeating-linear-gradient(45deg,#F2F5F8,#F2F5F8 5px,#E9EEF3 5px,#E9EEF3 10px);border-radius:3px;display:flex;overflow:hidden;border:1px solid var(--line-2)}
+.wl-seg{height:100%;display:grid;place-items:center;font-family:var(--mono);font-size:10.5px;color:#fff;min-width:0;transition:flex-basis .35s ease}
+.wl-total{font-family:var(--mono);font-size:15px;text-align:end;color:var(--text)}
+.wl-total.zero{color:#A9B7C4}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2)}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-inline-end:5px}
+.legend span{font-size:11.5px;color:var(--muted)}
+
+/* ---------- TABLE ---------- */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{
+  text-align:start;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.05em;
+  text-transform:uppercase;padding:9px 10px;background:#F6F8FA;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{color:var(--text)}
+th .ar{opacity:.45;font-size:9px}
+td{padding:9px 10px;border-bottom:1px solid var(--line-2);vertical-align:top}
+tbody tr:hover{background:#F8FAFB}
+.t-id{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+.t-desc{max-width:340px;min-width:200px}
+.t-desc .rem{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.spine{width:3px;padding:0 !important;background:var(--c)}
+.dt{font-family:var(--mono);font-size:12px;white-space:nowrap}
+.dt.late{color:var(--brand);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:99px;font-size:11.5px;font-weight:500;white-space:nowrap}
+.pill i{width:6px;height:6px;border-radius:99px;background:currentColor;flex:0 0 auto}
+.tag{display:inline-block;padding:1px 7px;border-radius:3px;background:var(--line-2);color:var(--muted);font-size:11.5px;white-space:nowrap}
+.badge-late{display:inline-block;margin-inline-start:6px;padding:1px 6px;border-radius:3px;background:#FCEEF0;color:var(--brand);font-size:10.5px;font-weight:600}
+.actions{display:flex;gap:5px;justify-content:flex-end}
+.iconbtn{width:27px;height:27px;border-radius:5px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--muted);font-size:13px}
+.iconbtn:hover{background:var(--line-2);color:var(--text)}
+.iconbtn.del:hover{background:#FCEEF0;color:var(--brand);border-color:#EFC2CB}
+.empty{padding:52px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--text);font-size:15px;margin-bottom:5px;font-weight:600}
+
+/* ---------- FILTERS ---------- */
+.filters{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.filters .inp{width:auto;min-width:130px;padding:7px 10px;font-size:12.5px}
+.filters .search{min-width:210px;flex:1;max-width:340px}
+.toggle{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);padding:7px 11px;background:#fff;border:1px solid var(--line);border-radius:var(--r)}
+.toggle input{accent-color:var(--brand)}
+
+/* ---------- MODAL ---------- */
+.overlay{position:fixed;inset:0;background:rgba(16,29,41,.5);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto}
+.modal{background:var(--card);border-radius:8px;width:100%;max-width:640px;box-shadow:0 18px 50px rgba(16,29,41,.28);margin:auto}
+.modal-h{padding:15px 18px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:10px}
+.modal-h h3{margin:0;font-size:15px;font-weight:600}
+.modal-b{padding:18px;max-height:70dvh;overflow-y:auto}
+.modal-f{padding:13px 18px;border-top:1px solid var(--line-2);display:flex;gap:9px;justify-content:flex-end;background:#FAFBFC;border-radius:0 0 8px 8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+.help{font-size:11.5px;color:var(--muted);margin-top:4px}
+.ro{background:#F4F7F9;color:var(--muted)}
+
+/* ---------- MISC ---------- */
+.ref-tables{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.toast{position:fixed;inset-block-end:22px;inset-inline-start:50%;transform:translateX(50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;z-index:120;box-shadow:0 8px 24px rgba(16,29,41,.3)}
+html[dir="ltr"] .toast{transform:translateX(-50%)}
+.banner{background:#FFF8E7;border:1px solid #EBD9AC;color:#7A5B10;padding:9px 13px;border-radius:var(--r);font-size:12.5px;margin-bottom:16px;display:flex;gap:9px;align-items:flex-start}
+@media(max-width:760px){
+  .topbar{padding:0 12px;gap:9px}
+  .tb-sub{display:none}
+  .tb-title{font-size:12.5px}
+  .chip-user .rl{display:none}
+  .chip-user .nm{max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tabs{padding:0 12px}
+  main{padding:16px 12px 56px}
+  .kpis{grid-template-columns:repeat(2,1fr);gap:9px}
+  .kpi .val{font-size:23px}
+  .wl-row{grid-template-columns:96px 1fr 34px;gap:9px}
+  .page-head h2{font-size:16px}
+  .filters .search{max-width:none;width:100%;flex:1 0 100%}
+}
+@media(max-width:430px){
+  .chip-user .nm{display:none}
+  .chip-user{padding:4px}
+  .topbar{gap:7px}
+  .tb-btn{padding:6px 8px;font-size:12px}
+}
+@media print{.topbar,.tabs,.filters,.actions,.page-head .btn,.banner{display:none !important}body{background:#fff}.card{box-shadow:none;border-color:#ccc}}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login">
+  <div class="lg-brand">
+    <div class="mark">
+      <div class="mark-badge">18</div>
+      <div>
+        <div class="mark-t" data-i18n="company"></div>
+        <div class="mark-s" data-i18n="project"></div>
+      </div>
+    </div>
+    <div class="lg-hero">
+      <h1 data-i18n="heroTitle"></h1>
+      <p data-i18n="heroText"></p>
+      <div class="lg-stats">
+        <div class="lg-stat"><b class="mono" id="lgTasks">0</b><span data-i18n="statTasks"></span></div>
+        <div class="lg-stat"><b class="mono" id="lgOpen">0</b><span data-i18n="statOpen"></span></div>
+        <div class="lg-stat"><b class="mono" id="lgTeam">0</b><span data-i18n="statTeam"></span></div>
+      </div>
+    </div>
+    <div class="lg-foot" data-i18n="brandFoot"></div>
+  </div>
+
+  <div class="lg-form">
+    <div class="lg-box">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
+        <button class="btn btn-ghost btn-sm" onclick="toggleLang()" id="langBtn2">English</button>
+      </div>
+      <h2 data-i18n="signIn"></h2>
+      <p class="sub" data-i18n="signInSub"></p>
+      <div id="loginErr" class="err" hidden></div>
+      <form onsubmit="doLogin(event)">
+        <div class="field">
+          <label for="lgUser" data-i18n="username"></label>
+          <select class="inp" id="lgUser"></select>
+        </div>
+        <div class="field">
+          <label for="lgPass" data-i18n="password"></label>
+          <input class="inp" id="lgPass" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit" data-i18n="signInBtn"></button>
+      </form>
+      <div class="hint" id="loginHint"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" hidden>
+  <header class="topbar">
+    <div class="mark">
+      <div class="mark-badge" style="width:34px;height:34px;font-size:11px">18</div>
+      <div>
+        <div class="tb-title" data-i18n="appName"></div>
+        <div class="tb-sub" data-i18n="project"></div>
+      </div>
+    </div>
+    <div class="tb-spacer"></div>
+    <button class="tb-btn" onclick="toggleLang()" id="langBtn">English</button>
+    <div class="chip-user">
+      <div class="avatar" id="meAvatar"></div>
+      <div><div class="nm" id="meName"></div><div class="rl" id="meRole"></div></div>
+    </div>
+    <button class="tb-btn" onclick="logout()" data-i18n="logout"></button>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="view"></main>
+</div>
+
+<div id="modalRoot"></div>
+
+<!-- ▼ Firebase: remove the comment marks on the next line after filling in firebase-adapter.js (see README) -->
+<!-- <script type="module" src="firebase-adapter.js"></script> -->
+
+<script>
+/* =====================================================================
+   Task Management System — Procurement Department
+   CR18G · Rua Al Madinah Superblock 5
+   Single-file app. Data layer is swappable (local <-> Firebase).
+   ===================================================================== */
+
+/* ---------- 1. REFERENCE DATA (from the INDEX sheet) ---------- */
+const TYPES = ["Core","Operational","Administrative","Emergency","Development"];
+const PRIORITIES = ["P1 - Immediate","P2 - Today","P3 - 2-3 Days","P4 - This Week","P5 - Low Priority"];
+const STATUSES = ["Not Started","In Progress","Completed","Delayed","On Hold"];
+const TARGET_DAYS = {"P1 - Immediate":0,"P2 - Today":0,"P3 - 2-3 Days":3,"P4 - This Week":7,"P5 - Low Priority":null};
+const PRIO_COLOR = {"P1 - Immediate":"var(--p1)","P2 - Today":"var(--p2)","P3 - 2-3 Days":"var(--p3)","P4 - This Week":"var(--p4)","P5 - Low Priority":"var(--p5)"};
+const STATUS_COLOR = {"Not Started":"var(--s-not)","In Progress":"var(--s-prog)","Completed":"var(--s-done)","Delayed":"var(--s-late)","On Hold":"var(--s-hold)"};
+
+/* ---------- 2. DEFAULT USERS ---------- */
+/* role: admin = full control + user management | manager = assigns & edits all | member = own tasks */
+const DEFAULT_USERS = [
+  {id:"u_abdulelah", name:"Abdulelah", nameAr:"عبدالإله", role:"admin",   pw:null, isAssignee:true,  isAssigner:false},
+  {id:"u_mohsin",    name:"Mohsin",    nameAr:"محسن",     role:"member",  pw:null, isAssignee:true,  isAssigner:false},
+  {id:"u_akram",     name:"Akram",     nameAr:"أكرم",     role:"member",  pw:null, isAssignee:true,  isAssigner:false},
+  {id:"u_ismail",    name:"Ismail",    nameAr:"إسماعيل",  role:"member",  pw:null, isAssignee:true,  isAssigner:false},
+  {id:"u_mansor",    name:"Mansor",    nameAr:"منصور",    role:"member",  pw:null, isAssignee:true,  isAssigner:false},
+  {id:"u_marwan",    name:"Mr Marwan", nameAr:"م. مروان", role:"manager", pw:null, isAssignee:false, isAssigner:true},
+  {id:"u_bo",        name:"Mr Bo",     nameAr:"م. بو",    role:"manager", pw:null, isAssignee:false, isAssigner:true},
+  {id:"u_yu",        name:"Mr Yu",     nameAr:"م. يو",    role:"manager", pw:null, isAssignee:false, isAssigner:true},
+];
+const DEFAULT_PW = "1234";
+
+/* ---------- 3. TRANSLATIONS ---------- */
+const T = {
+  ar:{
+    company:"مجموعة السكك الحديدية الصينية — المكتب 18",
+    project:"رؤى المدينة — سوبربلوك 5 · قسم المشتريات",
+    appName:"نظام إدارة المهام",
+    heroTitle:"مهام القسم في مكان واحد.",
+    heroText:"تسجيل المهام، متابعة حالتها، ومعرفة حِمل العمل لكل فرد في الفريق — بنفس منطق ملف الإكسل المعتمد.",
+    statTasks:"إجمالي المهام", statOpen:"مهام مفتوحة", statTeam:"أعضاء الفريق",
+    brandFoot:"للاستخدام الداخلي في قسم المشتريات.",
+    signIn:"تسجيل الدخول", signInSub:"اختر اسمك وأدخل كلمة المرور.",
+    username:"المستخدم", password:"كلمة المرور", signInBtn:"دخول",
+    wrongPw:"كلمة المرور غير صحيحة.",
+    hintText:"كلمة المرور الافتراضية لكل مستخدم: <code>1234</code> — غيّرها من الإعدادات بعد أول دخول.",
+    logout:"خروج",
+    tabDash:"اللوحة", tabTasks:"المهام", tabRef:"المرجع", tabSettings:"الإعدادات",
+    roleAdmin:"مسؤول النظام", roleManager:"مدير", roleMember:"موظف",
+    dashTitle:"لوحة أحمال الفريق",
+    dashSub:"تُحدَّث تلقائياً مع كل إضافة أو تغيير في حالة المهمة.",
+    kTotal:"إجمالي المهام", kNot:"لم تبدأ", kProg:"قيد التنفيذ", kDone:"مكتملة", kOver:"متأخرة عن الموعد",
+    kOverSub:"تجاوزت تاريخ الاستحقاق ولم تكتمل",
+    workload:"حِمل العمل لكل شخص", workloadNote:"طول الشريط يمثل عدد المهام مقارنةً بأكثر شخص انشغالاً",
+    nowWorking:"ما الذي ينفّذه كل شخص الآن", nowWorkingNote:"المهام التي حالتها «قيد التنفيذ»",
+    nothingNow:"لا توجد مهام قيد التنفيذ حالياً.",
+    overdueList:"مهام تجاوزت موعدها", noOverdue:"لا توجد مهام متأخرة. ",
+    tasksTitle:"سجل المهام", tasksSub:"كل مهام القسم مع إمكانية التصفية والبحث.",
+    addTask:"مهمة جديدة", exportCsv:"تصدير CSV", printBtn:"طباعة",
+    search:"بحث في الوصف أو الملاحظات…", allAssignees:"كل الموظفين", allStatuses:"كل الحالات",
+    allPriorities:"كل الأولويات", allTypes:"كل الأنواع", onlyMine:"مهامي فقط", onlyOpen:"المفتوحة فقط",
+    colN:"م", colType:"النوع", colPriority:"الأولوية", colDesc:"الوصف", colBy:"مُسندة من",
+    colTo:"مُسندة إلى", colDate:"تاريخ الإسناد", colTime:"الوقت", colDue:"الاستحقاق",
+    colDone:"تاريخ الإنجاز", colStatus:"الحالة", colRemarks:"ملاحظات", colActions:"",
+    emptyTitle:"لا توجد مهام مطابقة", emptyText:"عدّل عوامل التصفية، أو أضف مهمة جديدة.",
+    emptyTitle0:"ابدأ بأول مهمة", emptyText0:"أضف مهمة وحدّد من ينفّذها وموعد استحقاقها.",
+    newTask:"مهمة جديدة", editTask:"تعديل المهمة", save:"حفظ", cancel:"إلغاء", del:"حذف",
+    fDesc:"وصف المهمة", fDescPh:"مثال: متابعة عرض السعر لمواد الأعمال الكهروميكانيكية",
+    dueAuto:"يُحسب تلقائياً من الأولوية", dueManual:"أدخله يدوياً (P5 بلا موعد محدد)",
+    confirmDel:"حذف هذه المهمة نهائياً؟", saved:"تم الحفظ", deleted:"تم الحذف",
+    noPerm:"لا تملك صلاحية تعديل هذه المهمة.",
+    refTitle:"المرجع", refSub:"نفس تعريفات ورقة INDEX في ملف الإكسل.",
+    refPrio:"الأولويات", refType:"أنواع المهام", refStatus:"الحالات",
+    cMeaning:"المعنى", cTarget:"المستهدف", cDays:"عدد الأيام",
+    p5note:"P5 ليس له موعد محدد، لذا يُدخل تاريخ الاستحقاق يدوياً.",
+    setTitle:"الإعدادات", setSub:"كلمة المرور، المستخدمون، والنسخ الاحتياطي.",
+    changePw:"تغيير كلمة المرور", oldPw:"كلمة المرور الحالية", newPw:"كلمة المرور الجديدة",
+    pwChanged:"تم تغيير كلمة المرور", pwWrong:"كلمة المرور الحالية غير صحيحة", pwShort:"استخدم 4 خانات على الأقل",
+    users:"المستخدمون", addUser:"إضافة مستخدم", cName:"الاسم", cRole:"الصلاحية", cReset:"",
+    resetPw:"إعادة تعيين كلمة المرور", pwReset:"أُعيدت كلمة المرور إلى 1234",
+    backup:"النسخ الاحتياطي", backupText:"نزّل نسخة من كل البيانات، أو استعدها لاحقاً.",
+    exportJson:"تنزيل نسخة (JSON)", importJson:"استعادة من ملف", imported:"تمت الاستعادة",
+    importBad:"الملف غير صالح.",
+    storageNote:"البيانات محفوظة الآن في متصفح هذا الجهاز فقط. عند الربط بـ Firebase ستُشارك بين الجميع مباشرة.",
+    fName:"الاسم بالإنجليزية", fNameAr:"الاسم بالعربية", cannotDelSelf:"لا يمكنك حذف حسابك.",
+    lastAdmin:"يجب أن يبقى مسؤول واحد على الأقل.",
+    late:"متأخرة", tasksWord:"مهمة",
+    canGet:"يُسنَد إليه مهام", canGive:"يُسنِد مهام للآخرين",
+  },
+  en:{
+    company:"China Railway 18th Bureau Group",
+    project:"Rua Al Madinah — Superblock 5 · Procurement",
+    appName:"Task Management System",
+    heroTitle:"The department's tasks, in one place.",
+    heroText:"Log tasks, track status, and see each person's workload — following the same logic as the approved Excel file.",
+    statTasks:"Total tasks", statOpen:"Open tasks", statTeam:"Team members",
+    brandFoot:"Internal use — Procurement Department.",
+    signIn:"Sign in", signInSub:"Pick your name and enter your password.",
+    username:"User", password:"Password", signInBtn:"Sign in",
+    wrongPw:"Incorrect password.",
+    hintText:"Default password for every user: <code>1234</code> — change it from Settings after your first sign-in.",
+    logout:"Sign out",
+    tabDash:"Dashboard", tabTasks:"Tasks", tabRef:"Reference", tabSettings:"Settings",
+    roleAdmin:"Administrator", roleManager:"Manager", roleMember:"Team member",
+    dashTitle:"Team workload dashboard",
+    dashSub:"Updates automatically as tasks are added or their status changes.",
+    kTotal:"Total tasks", kNot:"Not started", kProg:"In progress", kDone:"Completed", kOver:"Past due",
+    kOverSub:"Due date passed, not completed",
+    workload:"Workload per person", workloadNote:"Bar length is relative to the busiest person",
+    nowWorking:"What each person is working on now", nowWorkingNote:"Tasks with status In Progress",
+    nothingNow:"Nothing in progress right now.",
+    overdueList:"Tasks past their due date", noOverdue:"Nothing is overdue. ",
+    tasksTitle:"Task register", tasksSub:"All department tasks, filterable and searchable.",
+    addTask:"New task", exportCsv:"Export CSV", printBtn:"Print",
+    search:"Search description or remarks…", allAssignees:"All assignees", allStatuses:"All statuses",
+    allPriorities:"All priorities", allTypes:"All types", onlyMine:"My tasks only", onlyOpen:"Open only",
+    colN:"N", colType:"Type", colPriority:"Priority", colDesc:"Description", colBy:"Assigned By",
+    colTo:"Assigned To", colDate:"Date Assigned", colTime:"Time", colDue:"Due Date",
+    colDone:"Completion Date", colStatus:"Status", colRemarks:"Remarks", colActions:"",
+    emptyTitle:"No matching tasks", emptyText:"Adjust the filters, or add a new task.",
+    emptyTitle0:"Start with the first task", emptyText0:"Add a task, choose who does it and when it is due.",
+    newTask:"New task", editTask:"Edit task", save:"Save", cancel:"Cancel", del:"Delete",
+    fDesc:"Task description", fDescPh:"e.g. Follow up on the RFQ for MEP materials",
+    dueAuto:"Calculated automatically from priority", dueManual:"Enter manually (P5 has no fixed target)",
+    confirmDel:"Delete this task permanently?", saved:"Saved", deleted:"Deleted",
+    noPerm:"You don't have permission to edit this task.",
+    refTitle:"Reference", refSub:"The same definitions as the INDEX sheet in the Excel file.",
+    refPrio:"Priorities", refType:"Task types", refStatus:"Statuses",
+    cMeaning:"Meaning", cTarget:"Target", cDays:"Target days",
+    p5note:"P5 has no fixed target, so the due date is entered manually.",
+    setTitle:"Settings", setSub:"Password, users, and backups.",
+    changePw:"Change password", oldPw:"Current password", newPw:"New password",
+    pwChanged:"Password changed", pwWrong:"Current password is incorrect", pwShort:"Use at least 4 characters",
+    users:"Users", addUser:"Add user", cName:"Name", cRole:"Role", cReset:"",
+    resetPw:"Reset password", pwReset:"Password reset to 1234",
+    backup:"Backup", backupText:"Download a copy of all data, or restore it later.",
+    exportJson:"Download backup (JSON)", importJson:"Restore from file", imported:"Restored",
+    importBad:"That file isn't valid.",
+    storageNote:"Data is currently stored in this browser only. Once connected to Firebase it will be shared live with everyone.",
+    fName:"Name (English)", fNameAr:"Name (Arabic)", cannotDelSelf:"You can't delete your own account.",
+    lastAdmin:"At least one administrator must remain.",
+    late:"Overdue", tasksWord:"tasks",
+    canGet:"Can receive tasks", canGive:"Can assign tasks",
+  }
+};
+const LBL = {
+  type:{ar:{Core:"أساسية",Operational:"تشغيلية",Administrative:"إدارية",Emergency:"طارئة",Development:"تطويرية"},en:{}},
+  status:{ar:{"Not Started":"لم تبدأ","In Progress":"قيد التنفيذ",Completed:"مكتملة",Delayed:"متأخرة","On Hold":"معلّقة"},en:{}},
+  priority:{ar:{"P1 - Immediate":"P1 — فوري","P2 - Today":"P2 — اليوم","P3 - 2-3 Days":"P3 — 2-3 أيام","P4 - This Week":"P4 — هذا الأسبوع","P5 - Low Priority":"P5 — منخفضة"},en:{}},
+};
+const REF_MEANING = {
+  priority:{
+    "P1 - Immediate":{ar:["عاجل / يتطلب إجراءً فورياً","خلال ساعة"],en:["Urgent / requires immediate action","Within 1 hour"]},
+    "P2 - Today":{ar:["أولوية عالية","نفس اليوم"],en:["High priority","Same day"]},
+    "P3 - 2-3 Days":{ar:["أولوية متوسطة","خلال 2-3 أيام"],en:["Medium priority","Within 2-3 days"]},
+    "P4 - This Week":{ar:["أولوية منخفضة","خلال الأسبوع"],en:["Low priority","Within the week"]},
+    "P5 - Low Priority":{ar:["بلا موعد محدد","يُدخل يدوياً"],en:["No fixed target","Entered manually"]},
+  },
+  type:{
+    Core:{ar:"مسؤولية رئيسية / مهمة جوهرية",en:"Main responsibility / essential task"},
+    Operational:{ar:"متابعة وتنسيق يومي",en:"Daily follow-up and coordination"},
+    Administrative:{ar:"تقارير وأرشفة وسجلات وتوثيق",en:"Reports, filing, records and documentation"},
+    Emergency:{ar:"مشكلة طارئة تؤثر على سير العمل/المشروع",en:"Unexpected issue affecting work/project progress"},
+    Development:{ar:"تحسين أو تطوير في الإجراءات",en:"Process improvement or development work"},
+  },
+  status:{
+    "Not Started":{ar:"لم يبدأ العمل عليها بعد",en:"Task has not been started yet"},
+    "In Progress":{ar:"بدأ العمل وهو جارٍ",en:"Work has begun and is ongoing"},
+    "Completed":{ar:"أُنجزت",en:"Task finished"},
+    "Delayed":{ar:"تجاوزت موعدها / متأخرة عن الجدول",en:"Past due date / behind schedule"},
+    "On Hold":{ar:"موقوفة مؤقتاً بانتظار شيء أو شخص",en:"Paused, waiting on something/someone"},
+  }
+};
+
+/* ---------- 4. STATE ---------- */
+let LANG = localStorage.getItem("tms_lang") || "ar";
+let DB = {users:[], tasks:[], seq:0};
+let ME = null;
+let TAB = "dash";
+let SORT = {key:"seq", dir:"desc"};
+let FILT = {q:"", to:"", st:"", pr:"", ty:"", mine:false, open:false};
+const t = k => (T[LANG][k] ?? T.ar[k] ?? k);
+const lbl = (group,v) => (LANG==="ar" && LBL[group].ar[v]) ? LBL[group].ar[v] : v;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- 5. STORAGE ADAPTER ----------
+   LocalStore keeps everything in this browser.
+   Drop in firebase-adapter.js (sets window.RemoteStore) to share data live. */
+const KEY = "tms_procurement_v1";
+const LocalStore = {
+  kind:"local",
+  async init(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(raw) DB = JSON.parse(raw);
+    }catch(e){ console.warn("Could not read saved data:", e); }
+    if(!DB.users || !DB.users.length) DB.users = DEFAULT_USERS.map(u=>({...u, pw:hash(DEFAULT_PW)}));
+    if(!DB.tasks) DB.tasks = [];
+    if(typeof DB.seq !== "number") DB.seq = DB.tasks.reduce((m,x)=>Math.max(m,x.seq||0),0);
+    if(!DB.seeded){ seedExample(); DB.seeded = true; }
+    await this.flush();
+  },
+  async flush(){
+    try{ localStorage.setItem(KEY, JSON.stringify(DB)); }
+    catch(e){ console.warn("Could not save. Data will be lost when the tab closes.", e); }
+  },
+  async putTask(task){ const i = DB.tasks.findIndex(x=>x.id===task.id); if(i<0) DB.tasks.push(task); else DB.tasks[i]=task; await this.flush(); },
+  async removeTask(id){ DB.tasks = DB.tasks.filter(x=>x.id!==id); await this.flush(); },
+  async putUser(u){ const i = DB.users.findIndex(x=>x.id===u.id); if(i<0) DB.users.push(u); else DB.users[i]=u; await this.flush(); },
+  async removeUser(id){ DB.users = DB.users.filter(x=>x.id!==id); await this.flush(); },
+  async replaceAll(next){ DB = next; await this.flush(); },
+  onChange(cb){ window.addEventListener("storage", e=>{ if(e.key===KEY){ try{DB=JSON.parse(e.newValue);cb();}catch(_){} } }); }
+};
+let Store = LocalStore;   // replaced at boot if firebase-adapter.js is loaded
+
+function seedExample(){
+  DB.seq = 1;
+  DB.tasks.push({
+    id:"t_sample", seq:1, type:"Operational", priority:"P2 - Today",
+    description:"Follow up with supplier on pending RFQ for MEP materials",
+    assignedBy:"Mr Marwan", assignedTo:"Abdulelah",
+    dateAssigned: todayISO(), timeAssigned:"09:00",
+    dueDate: todayISO(), completionDate:"", status:"In Progress",
+    remarks:"Example row — edit or delete it.",
+    createdBy:"system", createdAt:Date.now(), updatedAt:Date.now()
+  });
+}
+
+/* ---------- 6. HELPERS ---------- */
+function hash(str){ // deterministic, non-cryptographic. See README: real auth comes with Firebase.
+  let h1=0x811c9dc5, h2=0x01000193;
+  const s = "cr18g:"+str;
+  for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,16777619)>>>0; h2=Math.imul(h2+c^(h2<<5),2654435761)>>>0; }
+  return (h1.toString(36)+h2.toString(36));
+}
+function todayISO(){ const d=new Date(); return isoOf(d); }
+function isoOf(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function addDays(iso,n){ const [y,m,d]=iso.split("-").map(Number); const dt=new Date(y,m-1,d); dt.setDate(dt.getDate()+n); return isoOf(dt); }
+function calcDue(priority, dateAssigned){
+  const days = TARGET_DAYS[priority];
+  if(days===null || days===undefined || !dateAssigned) return "";
+  return addDays(dateAssigned, days);
+}
+function isOverdue(task){
+  if(task.status==="Completed") return false;
+  if(!task.dueDate) return false;
+  return task.dueDate < todayISO();
+}
+function fmtDate(iso){
+  if(!iso) return "—";
+  const [y,m,d]=iso.split("-");
+  return d+"/"+m+"/"+y;
+}
+function assignees(){ return DB.users.filter(u=>u.isAssignee).map(u=>u.name); }
+function assigners(){ const a=DB.users.filter(u=>u.isAssigner), b=DB.users.filter(u=>!u.isAssigner && u.role!=="member"); return [...a,...b].map(u=>u.name); }
+function userByName(n){ return DB.users.find(u=>u.name===n); }
+function displayName(u){ return LANG==="ar" ? (u.nameAr||u.name) : u.name; }
+function initials(n){ return (n||"?").replace(/^(Mr|Mrs|Ms)\.?\s+/i,"").trim().slice(0,2).toUpperCase(); }
+function canEdit(task){
+  if(!ME) return false;
+  if(ME.role==="admin"||ME.role==="manager") return true;
+  return task.assignedTo===ME.name || task.createdBy===ME.id;
+}
+function toast(msg){
+  const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
+}
+
+/* ---------- 7. LANGUAGE ---------- */
+function toggleLang(){ LANG = LANG==="ar" ? "en" : "ar"; localStorage.setItem("tms_lang",LANG); applyLang(); }
+function applyLang(){
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG==="ar" ? "rtl" : "ltr";
+  const label = LANG==="ar" ? "English" : "العربية";
+  ["langBtn","langBtn2"].forEach(id=>{ const b=document.getElementById(id); if(b) b.textContent=label; });
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  document.getElementById("loginHint").innerHTML = t("hintText");
+  if(ME){ renderShell(); render(); } else { renderLogin(); }
+}
+
+/* ---------- 8. LOGIN ---------- */
+function renderLogin(){
+  const sel = document.getElementById("lgUser");
+  const keep = sel.value;
+  sel.innerHTML = DB.users.map(u=>`<option value="${esc(u.id)}">${esc(displayName(u))} — ${esc(t("role"+u.role[0].toUpperCase()+u.role.slice(1)))}</option>`).join("");
+  if(keep) sel.value = keep;
+  document.getElementById("lgTasks").textContent = DB.tasks.length;
+  document.getElementById("lgOpen").textContent = DB.tasks.filter(x=>x.status!=="Completed").length;
+  document.getElementById("lgTeam").textContent = DB.users.length;
+}
+function doLogin(e){
+  e.preventDefault();
+  const id = document.getElementById("lgUser").value;
+  const pw = document.getElementById("lgPass").value;
+  const u = DB.users.find(x=>x.id===id);
+  const err = document.getElementById("loginErr");
+  if(!u || u.pw !== hash(pw)){ err.textContent = t("wrongPw"); err.hidden=false; return; }
+  err.hidden = true;
+  ME = u;
+  sessionStorage.setItem("tms_me", u.id);
+  document.getElementById("lgPass").value = "";
+  document.getElementById("login").hidden = true;
+  document.getElementById("app").hidden = false;
+  FILT.mine = (u.role==="member");
+  renderShell(); render();
+}
+function logout(){
+  ME=null; sessionStorage.removeItem("tms_me");
+  document.getElementById("app").hidden = true;
+  document.getElementById("login").hidden = false;
+  renderLogin();
+}
+
+/* ---------- 9. SHELL ---------- */
+function renderShell(){
+  document.getElementById("meAvatar").textContent = initials(ME.name);
+  document.getElementById("meName").textContent = displayName(ME);
+  document.getElementById("meRole").textContent = t("role"+ME.role[0].toUpperCase()+ME.role.slice(1));
+  const tabs = [["dash","tabDash"],["tasks","tabTasks"],["ref","tabRef"],["settings","tabSettings"]];
+  document.getElementById("tabs").innerHTML = tabs.map(([k,l])=>
+    `<button class="tab ${TAB===k?"on":""}" onclick="go('${k}')">${esc(t(l))}</button>`).join("");
+}
+function go(tab){ TAB=tab; renderShell(); render(); window.scrollTo(0,0); }
+function render(){
+  const v = document.getElementById("view");
+  if(TAB==="dash") v.innerHTML = viewDash();
+  else if(TAB==="tasks") v.innerHTML = viewTasks();
+  else if(TAB==="ref") v.innerHTML = viewRef();
+  else v.innerHTML = viewSettings();
+}
+
+/* ---------- 10. DASHBOARD ---------- */
+function viewDash(){
+  const all = DB.tasks;
+  const c = s => all.filter(x=>x.status===s).length;
+  const overdue = all.filter(isOverdue);
+  const people = DB.users.filter(u=>u.isAssignee);
+  const counts = people.map(u=>{
+    const mine = all.filter(x=>x.assignedTo===u.name);
+    return {u, total:mine.length, byStatus:Object.fromEntries(STATUSES.map(s=>[s,mine.filter(x=>x.status===s).length]))};
+  });
+  const max = Math.max(1, ...counts.map(x=>x.total));
+
+  const kpi = (lblKey,val,color,sub) => `
+    <div class="kpi" style="--c:${color}">
+      <div class="lbl">${esc(t(lblKey))}</div>
+      <div class="val">${val}</div>
+      ${sub?`<div class="sub">${esc(sub)}</div>`:""}
+    </div>`;
+
+  const wl = counts.map(({u,total,byStatus})=>`
+    <div class="wl-row">
+      <div class="wl-name"><div class="avatar">${esc(initials(u.name))}</div><span>${esc(displayName(u))}</span></div>
+      <div class="wl-bar">
+        ${STATUSES.filter(s=>byStatus[s]>0).map(s=>{
+          const pct = (byStatus[s]/max)*100;
+          return `<div class="wl-seg" style="flex:0 0 ${pct}%;background:${STATUS_COLOR[s]}" title="${esc(lbl('status',s))}: ${byStatus[s]}">${pct>5?byStatus[s]:""}</div>`;
+        }).join("")}
+      </div>
+      <div class="wl-total ${total===0?"zero":""}">${total}</div>
+    </div>`).join("");
+
+  const nowRows = people.map(u=>{
+    const list = all.filter(x=>x.assignedTo===u.name && x.status==="In Progress");
+    return `<tr>
+      <td style="white-space:nowrap"><div class="wl-name"><div class="avatar">${esc(initials(u.name))}</div><span>${esc(displayName(u))}</span></div></td>
+      <td>${list.length ? list.map(x=>`<div style="padding:2px 0"><span class="t-id">T-${String(x.seq).padStart(3,"0")}</span> ${esc(x.description)}${isOverdue(x)?`<span class="badge-late">${esc(t("late"))}</span>`:""}</div>`).join("")
+        : `<span style="color:var(--muted)">${esc(t("nothingNow"))}</span>`}</td>
+    </tr>`;
+  }).join("");
+
+  return `
+  <div class="page-head">
+    <div><h2>${esc(t("dashTitle"))}</h2><p>${esc(t("dashSub"))}</p></div>
+    <div class="grow"></div>
+    <button class="btn btn-primary btn-sm" onclick="openTask()">+ ${esc(t("addTask"))}</button>
+  </div>
+
+  <div class="kpis">
+    ${kpi("kTotal", all.length, "var(--ink)")}
+    ${kpi("kNot", c("Not Started"), "var(--s-not)")}
+    ${kpi("kProg", c("In Progress"), "var(--s-prog)")}
+    ${kpi("kDone", c("Completed"), "var(--s-done)")}
+    ${kpi("kOver", overdue.length, "var(--s-late)", t("kOverSub"))}
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-h"><h3>${esc(t("workload"))}</h3><span class="note">${esc(t("workloadNote"))}</span></div>
+    <div class="card-b">
+      ${wl || `<div class="empty">${esc(t("nothingNow"))}</div>`}
+      <div class="legend">
+        ${STATUSES.map(s=>`<span><i style="background:${STATUS_COLOR[s]}"></i>${esc(lbl("status",s))}</span>`).join("")}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-h"><h3>${esc(t("nowWorking"))}</h3><span class="note">${esc(t("nowWorkingNote"))}</span></div>
+    <div class="tw"><table><tbody>${nowRows}</tbody></table></div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><h3>${esc(t("overdueList"))}</h3></div>
+    ${overdue.length ? `<div class="tw"><table>
+      <thead><tr><th>${esc(t("colN"))}</th><th>${esc(t("colDesc"))}</th><th>${esc(t("colTo"))}</th><th>${esc(t("colDue"))}</th><th>${esc(t("colStatus"))}</th></tr></thead>
+      <tbody>${overdue.sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).map(x=>`
+        <tr>
+          <td class="t-id">T-${String(x.seq).padStart(3,"0")}</td>
+          <td class="t-desc">${esc(x.description)}</td>
+          <td>${esc(x.assignedTo)}</td>
+          <td class="dt late">${fmtDate(x.dueDate)}</td>
+          <td>${pillStatus(x.status)}</td>
+        </tr>`).join("")}</tbody></table></div>`
+      : `<div class="empty" style="padding:30px"><b>${esc(t("noOverdue"))}</b></div>`}
+  </div>`;
+}
+function pillStatus(s){
+  return `<span class="pill" style="color:${STATUS_COLOR[s]};background:${STATUS_COLOR[s]}14"><i></i>${esc(lbl("status",s))}</span>`;
+}
+
+/* ---------- 11. TASKS ---------- */
+function filtered(){
+  let rows = DB.tasks.slice();
+  const q = FILT.q.trim().toLowerCase();
+  if(q) rows = rows.filter(x=>(x.description+" "+(x.remarks||"")).toLowerCase().includes(q));
+  if(FILT.to) rows = rows.filter(x=>x.assignedTo===FILT.to);
+  if(FILT.st) rows = rows.filter(x=>x.status===FILT.st);
+  if(FILT.pr) rows = rows.filter(x=>x.priority===FILT.pr);
+  if(FILT.ty) rows = rows.filter(x=>x.type===FILT.ty);
+  if(FILT.mine && ME) rows = rows.filter(x=>x.assignedTo===ME.name || x.assignedBy===ME.name);
+  if(FILT.open) rows = rows.filter(x=>x.status!=="Completed");
+  const k = SORT.key, dir = SORT.dir==="asc"?1:-1;
+  rows.sort((a,b)=>{
+    let va=a[k]??"", vb=b[k]??"";
+    if(k==="priority"){ va=PRIORITIES.indexOf(a.priority); vb=PRIORITIES.indexOf(b.priority); }
+    if(typeof va==="number"&&typeof vb==="number") return (va-vb)*dir;
+    return String(va).localeCompare(String(vb))*dir;
+  });
+  return rows;
+}
+function setF(k,v){ FILT[k]=v; render(); }
+function sortBy(k){ SORT = {key:k, dir:(SORT.key===k && SORT.dir==="asc")?"desc":"asc"}; render(); }
+
+function viewTasks(){
+  const rows = filtered();
+  const th = (k,l,sortable=true)=>`<th class="${sortable?"sortable":""}" ${sortable?`onclick="sortBy('${k}')"`:""}>${esc(t(l))}${SORT.key===k?` <span class="ar">${SORT.dir==="asc"?"▲":"▼"}</span>`:""}</th>`;
+  return `
+  <div class="page-head">
+    <div><h2>${esc(t("tasksTitle"))}</h2><p>${esc(t("tasksSub"))}</p></div>
+    <div class="grow"></div>
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()">${esc(t("exportCsv"))}</button>
+    <button class="btn btn-ghost btn-sm" onclick="window.print()">${esc(t("printBtn"))}</button>
+    <button class="btn btn-primary btn-sm" onclick="openTask()">+ ${esc(t("addTask"))}</button>
+  </div>
+
+  <div class="filters">
+    <input class="inp search" placeholder="${esc(t("search"))}" value="${esc(FILT.q)}" oninput="FILT.q=this.value;debouncedRender()">
+    <select class="inp" onchange="setF('to',this.value)">
+      <option value="">${esc(t("allAssignees"))}</option>
+      ${assignees().map(n=>`<option ${FILT.to===n?"selected":""}>${esc(n)}</option>`).join("")}
+    </select>
+    <select class="inp" onchange="setF('st',this.value)">
+      <option value="">${esc(t("allStatuses"))}</option>
+      ${STATUSES.map(s=>`<option value="${esc(s)}" ${FILT.st===s?"selected":""}>${esc(lbl("status",s))}</option>`).join("")}
+    </select>
+    <select class="inp" onchange="setF('pr',this.value)">
+      <option value="">${esc(t("allPriorities"))}</option>
+      ${PRIORITIES.map(s=>`<option value="${esc(s)}" ${FILT.pr===s?"selected":""}>${esc(lbl("priority",s))}</option>`).join("")}
+    </select>
+    <select class="inp" onchange="setF('ty',this.value)">
+      <option value="">${esc(t("allTypes"))}</option>
+      ${TYPES.map(s=>`<option value="${esc(s)}" ${FILT.ty===s?"selected":""}>${esc(lbl("type",s))}</option>`).join("")}
+    </select>
+    <label class="toggle"><input type="checkbox" ${FILT.mine?"checked":""} onchange="setF('mine',this.checked)"> ${esc(t("onlyMine"))}</label>
+    <label class="toggle"><input type="checkbox" ${FILT.open?"checked":""} onchange="setF('open',this.checked)"> ${esc(t("onlyOpen"))}</label>
+  </div>
+
+  <div class="card">
+    ${rows.length ? `<div class="tw"><table>
+      <thead><tr>
+        <th style="width:3px;padding:0"></th>
+        ${th("seq","colN")}${th("type","colType")}${th("priority","colPriority")}
+        <th>${esc(t("colDesc"))}</th>
+        ${th("assignedBy","colBy")}${th("assignedTo","colTo")}${th("dateAssigned","colDate")}
+        ${th("dueDate","colDue")}${th("completionDate","colDone")}${th("status","colStatus")}
+        <th></th>
+      </tr></thead>
+      <tbody>
+      ${rows.map(x=>`
+        <tr>
+          <td class="spine" style="--c:${PRIO_COLOR[x.priority]}"></td>
+          <td class="t-id">T-${String(x.seq).padStart(3,"0")}</td>
+          <td><span class="tag">${esc(lbl("type",x.type))}</span></td>
+          <td><span class="pill" style="color:${PRIO_COLOR[x.priority]};background:${PRIO_COLOR[x.priority]}14">${esc(lbl("priority",x.priority))}</span></td>
+          <td class="t-desc">${esc(x.description)}${x.remarks?`<span class="rem">${esc(x.remarks)}</span>`:""}</td>
+          <td style="white-space:nowrap">${esc(x.assignedBy||"—")}</td>
+          <td style="white-space:nowrap">${esc(x.assignedTo||"—")}</td>
+          <td class="dt">${fmtDate(x.dateAssigned)}${x.timeAssigned?`<br><span style="color:var(--muted)">${esc(x.timeAssigned)}</span>`:""}</td>
+          <td class="dt ${isOverdue(x)?"late":""}">${fmtDate(x.dueDate)}${isOverdue(x)?`<span class="badge-late">${esc(t("late"))}</span>`:""}</td>
+          <td class="dt">${fmtDate(x.completionDate)}</td>
+          <td>${pillStatus(x.status)}</td>
+          <td><div class="actions">
+            <button class="iconbtn" title="${esc(t("editTask"))}" onclick="openTask('${x.id}')">✎</button>
+            ${(ME.role==="admin"||ME.role==="manager")?`<button class="iconbtn del" title="${esc(t("del"))}" onclick="delTask('${x.id}')">✕</button>`:""}
+          </div></td>
+        </tr>`).join("")}
+      </tbody></table></div>`
+    : `<div class="empty">
+        <b>${esc(DB.tasks.length?t("emptyTitle"):t("emptyTitle0"))}</b>
+        <div>${esc(DB.tasks.length?t("emptyText"):t("emptyText0"))}</div>
+        <div style="margin-top:14px"><button class="btn btn-primary btn-sm" onclick="openTask()">+ ${esc(t("addTask"))}</button></div>
+      </div>`}
+  </div>`;
+}
+let _dt; function debouncedRender(){ clearTimeout(_dt); _dt=setTimeout(render,220); }
+
+/* ---------- 12. TASK MODAL ---------- */
+function openTask(id){
+  const x = id ? DB.tasks.find(v=>v.id===id) : null;
+  if(x && !canEdit(x)){ toast(t("noPerm")); return; }
+  const isNew = !x;
+  const d = x || {
+    type:"Operational", priority:"P2 - Today", description:"",
+    assignedBy: assigners().includes(ME.name) ? ME.name : (assigners()[0]||""),
+    assignedTo: ME.isAssignee ? ME.name : (assignees()[0]||""),
+    dateAssigned: todayISO(), timeAssigned: new Date().toTimeString().slice(0,5),
+    dueDate: calcDue("P2 - Today", todayISO()), completionDate:"", status:"Not Started", remarks:""
+  };
+  const memberLock = ME.role==="member" && !isNew;
+  const opt = (arr,cur,group)=>arr.map(v=>`<option value="${esc(v)}" ${cur===v?"selected":""}>${esc(group?lbl(group,v):v)}</option>`).join("");
+
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-h"><h3>${esc(isNew?t("newTask"):t("editTask"))}</h3>
+        ${!isNew?`<span class="t-id" style="margin-inline-start:auto">T-${String(d.seq).padStart(3,"0")}</span>`:""}</div>
+      <div class="modal-b">
+        <div class="field">
+          <label for="fDesc">${esc(t("fDesc"))}</label>
+          <textarea class="inp" id="fDesc" rows="2" placeholder="${esc(t("fDescPh"))}" ${memberLock?"disabled":""}>${esc(d.description)}</textarea>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="fType">${esc(t("colType"))}</label>
+            <select class="inp" id="fType" ${memberLock?"disabled":""}>${opt(TYPES,d.type,"type")}</select></div>
+          <div class="field"><label for="fPrio">${esc(t("colPriority"))}</label>
+            <select class="inp" id="fPrio" onchange="syncDue()" ${memberLock?"disabled":""}>${opt(PRIORITIES,d.priority,"priority")}</select></div>
+          <div class="field"><label for="fBy">${esc(t("colBy"))}</label>
+            <select class="inp" id="fBy" ${memberLock?"disabled":""}>${opt(assigners(),d.assignedBy)}</select></div>
+          <div class="field"><label for="fTo">${esc(t("colTo"))}</label>
+            <select class="inp" id="fTo" ${memberLock?"disabled":""}>${opt(assignees(),d.assignedTo)}</select></div>
+          <div class="field"><label for="fDate">${esc(t("colDate"))}</label>
+            <input class="inp" id="fDate" type="date" value="${esc(d.dateAssigned)}" onchange="syncDue()" ${memberLock?"disabled":""}></div>
+          <div class="field"><label for="fTime">${esc(t("colTime"))}</label>
+            <input class="inp" id="fTime" type="time" value="${esc(d.timeAssigned||"")}" ${memberLock?"disabled":""}></div>
+          <div class="field"><label for="fDue">${esc(t("colDue"))}</label>
+            <input class="inp" id="fDue" type="date" value="${esc(d.dueDate||"")}">
+            <div class="help" id="dueHelp"></div></div>
+          <div class="field"><label for="fStatus">${esc(t("colStatus"))}</label>
+            <select class="inp" id="fStatus" onchange="syncDone()">${opt(STATUSES,d.status,"status")}</select></div>
+          <div class="field"><label for="fDone">${esc(t("colDone"))}</label>
+            <input class="inp" id="fDone" type="date" value="${esc(d.completionDate||"")}"></div>
+        </div>
+        <div class="field"><label for="fRem">${esc(t("colRemarks"))}</label>
+          <textarea class="inp" id="fRem" rows="2">${esc(d.remarks||"")}</textarea></div>
+      </div>
+      <div class="modal-f">
+        ${!isNew && (ME.role==="admin"||ME.role==="manager") ? `<button class="btn btn-danger btn-sm" onclick="delTask('${d.id}')">${esc(t("del"))}</button><div class="grow"></div>`:""}
+        <button class="btn btn-ghost" onclick="closeModal()">${esc(t("cancel"))}</button>
+        <button class="btn btn-primary" onclick="saveTask('${isNew?"":d.id}')">${esc(t("save"))}</button>
+      </div>
+    </div>
+  </div>`;
+  syncDue(true);
+  setTimeout(()=>document.getElementById("fDesc")?.focus(),40);
+}
+function syncDue(keep){
+  const p = document.getElementById("fPrio").value;
+  const da = document.getElementById("fDate").value;
+  const due = document.getElementById("fDue");
+  const help = document.getElementById("dueHelp");
+  const auto = TARGET_DAYS[p] !== null && TARGET_DAYS[p] !== undefined;
+  if(auto){
+    if(!keep || !due.value) due.value = calcDue(p, da);
+    else due.value = calcDue(p, da);
+    help.textContent = t("dueAuto");
+  } else {
+    help.textContent = t("dueManual");
+  }
+}
+function syncDone(){
+  const st = document.getElementById("fStatus").value;
+  const done = document.getElementById("fDone");
+  if(st==="Completed" && !done.value) done.value = todayISO();
+  if(st!=="Completed") done.value = "";
+}
+function closeModal(){ document.getElementById("modalRoot").innerHTML=""; }
+
+async function saveTask(id){
+  const g = i => document.getElementById(i);
+  const desc = g("fDesc").value.trim();
+  if(!desc){ g("fDesc").focus(); g("fDesc").style.borderColor="var(--brand)"; return; }
+  const existing = id ? DB.tasks.find(x=>x.id===id) : null;
+  const task = {
+    id: id || ("t_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+    seq: existing ? existing.seq : (++DB.seq),
+    type: g("fType").value, priority: g("fPrio").value, description: desc,
+    assignedBy: g("fBy").value, assignedTo: g("fTo").value,
+    dateAssigned: g("fDate").value, timeAssigned: g("fTime").value,
+    dueDate: g("fDue").value, completionDate: g("fDone").value,
+    status: g("fStatus").value, remarks: g("fRem").value.trim(),
+    createdBy: existing ? existing.createdBy : ME.id,
+    createdAt: existing ? existing.createdAt : Date.now(),
+    updatedAt: Date.now()
+  };
+  await Store.putTask(task);
+  if(!existing) await Store.flush?.();
+  closeModal(); render(); toast(t("saved"));
+}
+async function delTask(id){
+  if(!confirm(t("confirmDel"))) return;
+  await Store.removeTask(id);
+  closeModal(); render(); toast(t("deleted"));
+}
+
+/* ---------- 13. REFERENCE ---------- */
+function viewRef(){
+  const R = REF_MEANING;
+  return `
+  <div class="page-head"><div><h2>${esc(t("refTitle"))}</h2><p>${esc(t("refSub"))}</p></div></div>
+  <div class="ref-tables">
+    <div class="card">
+      <div class="card-h"><h3>${esc(t("refPrio"))}</h3></div>
+      <div class="tw"><table>
+        <thead><tr><th>${esc(t("colPriority"))}</th><th>${esc(t("cMeaning"))}</th><th>${esc(t("cTarget"))}</th><th>${esc(t("cDays"))}</th></tr></thead>
+        <tbody>${PRIORITIES.map(p=>`<tr>
+          <td><span class="pill" style="color:${PRIO_COLOR[p]};background:${PRIO_COLOR[p]}14">${esc(lbl("priority",p))}</span></td>
+          <td>${esc(R.priority[p][LANG][0])}</td><td>${esc(R.priority[p][LANG][1])}</td>
+          <td class="mono">${TARGET_DAYS[p]===null?"—":TARGET_DAYS[p]}</td></tr>`).join("")}</tbody>
+      </table></div>
+      <div class="card-b" style="padding-top:12px;color:var(--muted);font-size:12px">${esc(t("p5note"))}</div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>${esc(t("refType"))}</h3></div>
+      <div class="tw"><table>
+        <thead><tr><th>${esc(t("colType"))}</th><th>${esc(t("cMeaning"))}</th></tr></thead>
+        <tbody>${TYPES.map(k=>`<tr><td><span class="tag">${esc(lbl("type",k))}</span></td><td>${esc(R.type[k][LANG])}</td></tr>`).join("")}</tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>${esc(t("refStatus"))}</h3></div>
+      <div class="tw"><table>
+        <thead><tr><th>${esc(t("colStatus"))}</th><th>${esc(t("cMeaning"))}</th></tr></thead>
+        <tbody>${STATUSES.map(k=>`<tr><td>${pillStatus(k)}</td><td>${esc(R.status[k][LANG])}</td></tr>`).join("")}</tbody>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- 14. SETTINGS ---------- */
+function viewSettings(){
+  const isAdmin = ME.role==="admin";
+  return `
+  <div class="page-head"><div><h2>${esc(t("setTitle"))}</h2><p>${esc(t("setSub"))}</p></div></div>
+  <div class="banner"><span>ℹ️</span><span>${esc(t("storageNote"))}</span></div>
+  <div class="ref-tables">
+    <div class="card">
+      <div class="card-h"><h3>${esc(t("changePw"))}</h3></div>
+      <div class="card-b">
+        <div class="field"><label for="pwOld">${esc(t("oldPw"))}</label><input class="inp" id="pwOld" type="password"></div>
+        <div class="field"><label for="pwNew">${esc(t("newPw"))}</label><input class="inp" id="pwNew" type="password"></div>
+        <button class="btn btn-primary btn-sm" onclick="changePw()">${esc(t("save"))}</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h3>${esc(t("backup"))}</h3></div>
+      <div class="card-b">
+        <p style="margin-top:0;color:var(--muted);font-size:12.5px">${esc(t("backupText"))}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="exportJSON()">${esc(t("exportJson"))}</button>
+          <label class="btn btn-ghost btn-sm" style="cursor:pointer">${esc(t("importJson"))}
+            <input type="file" accept="application/json" hidden onchange="importJSON(this)"></label>
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">${esc(t("exportCsv"))}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  ${isAdmin?`
+  <div class="card" style="margin-top:16px">
+    <div class="card-h"><h3>${esc(t("users"))}</h3><div class="grow"></div>
+      <button class="btn btn-ghost btn-sm" onclick="openUser()">+ ${esc(t("addUser"))}</button></div>
+    <div class="tw"><table>
+      <thead><tr><th>${esc(t("cName"))}</th><th>${esc(t("cRole"))}</th><th>${esc(t("canGet"))}</th><th></th></tr></thead>
+      <tbody>${DB.users.map(u=>`<tr>
+        <td><div class="wl-name"><div class="avatar">${esc(initials(u.name))}</div><span>${esc(u.name)}${u.nameAr?` · ${esc(u.nameAr)}`:""}</span></div></td>
+        <td><span class="tag">${esc(t("role"+u.role[0].toUpperCase()+u.role.slice(1)))}</span></td>
+        <td>${u.isAssignee?"✓":"—"}</td>
+        <td><div class="actions">
+          <button class="iconbtn" title="${esc(t("resetPw"))}" onclick="resetPw('${u.id}')">↺</button>
+          <button class="iconbtn" onclick="openUser('${u.id}')">✎</button>
+          <button class="iconbtn del" onclick="delUser('${u.id}')">✕</button>
+        </div></td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+  </div>`:""}`;
+}
+async function changePw(){
+  const o=document.getElementById("pwOld").value, n=document.getElementById("pwNew").value;
+  if(ME.pw!==hash(o)) return toast(t("pwWrong"));
+  if(n.length<4) return toast(t("pwShort"));
+  ME.pw = hash(n); await Store.putUser(ME);
+  document.getElementById("pwOld").value=""; document.getElementById("pwNew").value="";
+  toast(t("pwChanged"));
+}
+async function resetPw(id){
+  const u=DB.users.find(x=>x.id===id); if(!u) return;
+  u.pw=hash(DEFAULT_PW); await Store.putUser(u); toast(t("pwReset"));
+}
+function openUser(id){
+  const u = id ? DB.users.find(x=>x.id===id) : {name:"",nameAr:"",role:"member",isAssignee:true,isAssigner:false};
+  document.getElementById("modalRoot").innerHTML=`
+  <div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:440px">
+    <div class="modal-h"><h3>${esc(id?t("cName"):t("addUser"))}</h3></div>
+    <div class="modal-b">
+      <div class="field"><label for="uName">${esc(t("fName"))}</label><input class="inp" id="uName" value="${esc(u.name)}"></div>
+      <div class="field"><label for="uNameAr">${esc(t("fNameAr"))}</label><input class="inp" id="uNameAr" value="${esc(u.nameAr||"")}"></div>
+      <div class="field"><label for="uRole">${esc(t("cRole"))}</label><select class="inp" id="uRole">
+        ${["admin","manager","member"].map(r=>`<option value="${r}" ${u.role===r?"selected":""}>${esc(t("role"+r[0].toUpperCase()+r.slice(1)))}</option>`).join("")}
+      </select></div>
+      <label class="toggle" style="width:100%"><input type="checkbox" id="uAssignee" ${u.isAssignee?"checked":""}> ${esc(t("canGet"))}</label>
+      <label class="toggle" style="width:100%;margin-top:8px"><input type="checkbox" id="uAssigner" ${u.isAssigner?"checked":""}> ${esc(t("canGive"))}</label>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-ghost" onclick="closeModal()">${esc(t("cancel"))}</button>
+      <button class="btn btn-primary" onclick="saveUser('${id||""}')">${esc(t("save"))}</button>
+    </div>
+  </div></div>`;
+}
+async function saveUser(id){
+  const name=document.getElementById("uName").value.trim();
+  if(!name) return;
+  const existing = id ? DB.users.find(x=>x.id===id) : null;
+  const u = {
+    id: id || ("u_"+Date.now().toString(36)),
+    name, nameAr: document.getElementById("uNameAr").value.trim(),
+    role: document.getElementById("uRole").value,
+    isAssignee: document.getElementById("uAssignee").checked,
+    isAssigner: document.getElementById("uAssigner").checked,
+    pw: existing ? existing.pw : hash(DEFAULT_PW)
+  };
+  await Store.putUser(u);
+  if(ME.id===u.id) ME=u;
+  closeModal(); render(); toast(t("saved"));
+}
+async function delUser(id){
+  if(id===ME.id) return toast(t("cannotDelSelf"));
+  const admins = DB.users.filter(u=>u.role==="admin" && u.id!==id);
+  if(!admins.length) return toast(t("lastAdmin"));
+  if(!confirm(t("confirmDel"))) return;
+  await Store.removeUser(id); render(); toast(t("deleted"));
+}
+
+/* ---------- 15. EXPORT / IMPORT ---------- */
+function exportCSV(){
+  const head = ["N","Type","Priority","Description","Assigned By","Assigned To","Date Assigned","Time Assigned","Due Date","Completion Date","Status","Remarks"];
+  const rows = filtered().map(x=>[x.seq,x.type,x.priority,x.description,x.assignedBy,x.assignedTo,x.dateAssigned,x.timeAssigned,x.dueDate,x.completionDate,x.status,x.remarks]);
+  const q = v => `"${String(v??"").replace(/"/g,'""')}"`;
+  const csv = "\uFEFF" + [head.map(q).join(","), ...rows.map(r=>r.map(q).join(","))].join("\r\n");
+  download(new Blob([csv],{type:"text/csv;charset=utf-8"}), `Task_Management_${todayISO()}.csv`);
+}
+function exportJSON(){
+  download(new Blob([JSON.stringify(DB,null,2)],{type:"application/json"}), `tms_backup_${todayISO()}.json`);
+}
+function importJSON(input){
+  const f = input.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = async () => {
+    try{
+      const next = JSON.parse(r.result);
+      if(!next.users || !next.tasks) throw new Error("shape");
+      await Store.replaceAll(next);
+      ME = DB.users.find(u=>u.id===ME.id) || DB.users[0];
+      render(); toast(t("imported"));
+    }catch(e){ toast(t("importBad")); }
+    input.value="";
+  };
+  r.readAsText(f);
+}
+function download(blob, filename){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+
+/* ---------- 16. BOOT ---------- */
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+
+async function boot(){
+  /* If firebase-adapter.js is loaded it defines window.RemoteStoreFactory.
+     Module scripts run before DOMContentLoaded, so it is ready by now. */
+  if(window.RemoteStoreFactory){
+    try{
+      Store = await window.RemoteStoreFactory({
+        getDB:()=>DB, setDB:d=>{DB=d},
+        DEFAULT_USERS, DEFAULT_PW, hash, todayISO
+      });
+      console.info("Task Management: connected to Firebase.");
+    }catch(e){
+      console.error("Task Management: Firebase unavailable, using this browser's local storage.", e);
+      Store = LocalStore;
+    }
+  }
+  await Store.init();
+  Store.onChange?.(()=>{ if(ME) render(); else renderLogin(); });
+  applyLang();
+  const savedId = sessionStorage.getItem("tms_me");
+  const u = savedId && DB.users.find(x=>x.id===savedId);
+  if(u){
+    ME = u;
+    document.getElementById("login").hidden = true;
+    document.getElementById("app").hidden = false;
+    FILT.mine = (u.role==="member");
+    renderShell(); render();
+  } else {
+    renderLogin();
+  }
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+</script>
+</body>
+</html>
