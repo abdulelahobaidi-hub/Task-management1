@@ -165,8 +165,21 @@ tbody tr:hover{background:#F8FAFB}
 .t-id{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
 .t-desc{max-width:340px;min-width:200px}
 .t-desc .rem{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
-.t-rem{max-width:220px;min-width:120px;color:var(--muted);font-size:12.5px}
+.t-rem{max-width:230px;min-width:120px;color:var(--muted);font-size:12.5px}
 .t-rem .dash{color:#C3CDD6}
+.rem-n{display:inline-block;margin-inline-start:6px;padding:0 6px;border-radius:99px;background:var(--line-2);color:var(--muted);font-family:var(--mono);font-size:10.5px;vertical-align:middle}
+#thread{max-height:210px;overflow-y:auto;border:1px solid var(--line);border-radius:var(--r);background:#FAFBFC;padding:8px}
+.cm{padding:7px 9px;background:#fff;border:1px solid var(--line-2);border-radius:var(--r);margin-bottom:7px}
+.cm:last-child{margin-bottom:0}
+.cm-head{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.cm-who{font-size:12px;font-weight:600}
+.cm-when{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.cm-del{margin-inline-start:auto;color:#B6C2CD;font-size:12px;line-height:1;padding:2px 4px;border-radius:3px}
+.cm-del:hover{color:var(--brand);background:#FCEEF0}
+.cm-body{font-size:13px;white-space:pre-wrap;word-break:break-word}
+.cm-empty{padding:12px;text-align:center;color:var(--muted);font-size:12.5px}
+.cm-add{display:flex;gap:8px;align-items:flex-end;margin-top:8px}
+.cm-add textarea{flex:1}
 .spine{width:3px;padding:0 !important;background:var(--c)}
 .dt{font-family:var(--mono);font-size:12px;white-space:nowrap}
 .dt.late{color:var(--brand);font-weight:600}
@@ -389,6 +402,10 @@ const T = {
     fName:"الاسم بالإنجليزية", fNameAr:"الاسم بالعربية", cannotDelSelf:"لا يمكنك حذف حسابك.",
     lastAdmin:"يجب أن يبقى مسؤول واحد على الأقل.",
     late:"متأخرة", tasksWord:"مهمة",
+    comments:"التعليقات", addComment:"إضافة", commentPh:"اكتب تحديثاً على هذه المهمة…",
+    firstComment:"أول تعليق (اختياري)", noComments:"لا توجد تعليقات بعد.",
+    legacyNote:"ملاحظة قديمة", delComment:"حذف التعليق؟", commentAdded:"أُضيف التعليق",
+    roNote:"هذه المهمة ليست من مهامك، فالحقول للعرض فقط — لكن يمكنك إضافة تعليق.", close:"إغلاق",
     canGet:"يُسنَد إليه مهام", canGive:"يُسنِد مهام للآخرين",
   },
   en:{
@@ -445,6 +462,10 @@ const T = {
     fName:"Name (English)", fNameAr:"Name (Arabic)", cannotDelSelf:"You can't delete your own account.",
     lastAdmin:"At least one administrator must remain.",
     late:"Overdue", tasksWord:"tasks",
+    comments:"Comments", addComment:"Add", commentPh:"Write an update on this task…",
+    firstComment:"First comment (optional)", noComments:"No comments yet.",
+    legacyNote:"Earlier note", delComment:"Delete this comment?", commentAdded:"Comment added",
+    roNote:"This task isn't yours, so the fields are view-only — but you can still add a comment.", close:"Close",
     canGet:"Can receive tasks", canGive:"Can assign tasks",
   }
 };
@@ -566,6 +587,27 @@ function canEdit(task){
   if(ME.role==="admin"||ME.role==="manager") return true;
   return task.assignedTo===ME.name || task.createdBy===ME.id;
 }
+function fmtWhen(ts){
+  if(!ts) return "";
+  const d=new Date(ts), z=n=>String(n).padStart(2,"0");
+  return z(d.getDate())+"/"+z(d.getMonth()+1)+"/"+d.getFullYear()+" "+z(d.getHours())+":"+z(d.getMinutes());
+}
+/* Comment thread. Legacy single-field remarks are shown as the first entry
+   so nothing written before this feature is lost. */
+function commentsOf(x){
+  const list = Array.isArray(x.comments) ? x.comments.slice() : [];
+  if(x.remarks) list.unshift({id:"legacy", uid:"", name:"", text:x.remarks, at:x.createdAt||0, legacy:true});
+  return list;
+}
+function commentText(x){ return commentsOf(x).map(c=>c.text).join(" "); }
+function remCell(x){
+  const c = commentsOf(x);
+  if(!c.length) return '<span class="dash">—</span>';
+  const last = c[c.length-1];
+  return '<span class="rem-txt">'+esc(last.text)+'</span>'
+       + (c.length>1 ? '<span class="rem-n">'+c.length+'</span>' : '');
+}
+function canDelComment(c){ return !c.legacy && (c.uid===ME.id || ME.role==="admin" || ME.role==="manager"); }
 function toast(msg){
   const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
   document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
@@ -727,7 +769,7 @@ function pillStatus(s){
 function filtered(){
   let rows = DB.tasks.slice();
   const q = FILT.q.trim().toLowerCase();
-  if(q) rows = rows.filter(x=>(x.description+" "+(x.remarks||"")).toLowerCase().includes(q));
+  if(q) rows = rows.filter(x=>(x.description+" "+commentText(x)).toLowerCase().includes(q));
   if(FILT.to) rows = rows.filter(x=>x.assignedTo===FILT.to);
   if(FILT.st) rows = rows.filter(x=>x.status===FILT.st);
   if(FILT.pr) rows = rows.filter(x=>x.priority===FILT.pr);
@@ -805,7 +847,7 @@ function viewTasks(){
           <td class="dt ${isOverdue(x)?"late":""}">${fmtDate(x.dueDate)}${isOverdue(x)?`<span class="badge-late">${esc(t("late"))}</span>`:""}</td>
           <td class="dt">${fmtDate(x.completionDate)}</td>
           <td>${pillStatus(x.status)}</td>
-          <td class="t-rem">${x.remarks?esc(x.remarks):'<span class="dash">—</span>'}</td>
+          <td class="t-rem">${remCell(x)}</td>
           <td><div class="actions">
             <button class="iconbtn" title="${esc(t("editTask"))}" onclick="openTask('${x.id}')">✎</button>
             ${(ME.role==="admin"||ME.role==="manager")?`<button class="iconbtn del" title="${esc(t("del"))}" onclick="delTask('${x.id}')">✕</button>`:""}
@@ -824,8 +866,8 @@ let _dt; function debouncedRender(){ clearTimeout(_dt); _dt=setTimeout(render,22
 /* ---------- 12. TASK MODAL ---------- */
 function openTask(id){
   const x = id ? DB.tasks.find(v=>v.id===id) : null;
-  if(x && !canEdit(x)){ toast(t("noPerm")); return; }
   const isNew = !x;
+  const ro = !!x && !canEdit(x);   /* read-only: view + comment, no field edits */
   const d = x || {
     type:"Operational", priority:"P2 - Today", description:"",
     assignedBy: assigners().includes(ME.name) ? ME.name : (assigners()[0]||""),
@@ -833,8 +875,20 @@ function openTask(id){
     dateAssigned: todayISO(), timeAssigned: new Date().toTimeString().slice(0,5),
     dueDate: calcDue("P2 - Today", todayISO()), completionDate:"", status:"Not Started", remarks:""
   };
-  const memberLock = ME.role==="member" && !isNew;
+  const memberLock = (ME.role==="member" && !isNew) || ro;
+  const lock = ro ? " disabled" : "";
   const opt = (arr,cur,group)=>arr.map(v=>`<option value="${esc(v)}" ${cur===v?"selected":""}>${esc(group?lbl(group,v):v)}</option>`).join("");
+  const CM_BLOCK = isNew
+    ? `<div class="field"><label for="fFirst">${esc(t("firstComment"))}</label>
+         <textarea class="inp" id="fFirst" rows="2" placeholder="${esc(t("commentPh"))}"></textarea></div>`
+    : `<div class="field">
+         <label>${esc(t("comments"))}</label>
+         <div id="thread">${threadHTML(d)}</div>
+         <div class="cm-add">
+           <textarea class="inp" id="fNew" rows="2" placeholder="${esc(t("commentPh"))}"></textarea>
+           <button class="btn btn-ghost btn-sm" onclick="addComment('${d.id}')">${esc(t("addComment"))}</button>
+         </div>
+       </div>`;
 
   document.getElementById("modalRoot").innerHTML = `
   <div class="overlay" onclick="if(event.target===this)closeModal()">
@@ -842,6 +896,7 @@ function openTask(id){
       <div class="modal-h"><h3>${esc(isNew?t("newTask"):t("editTask"))}</h3>
         ${!isNew?`<span class="t-id" style="margin-inline-start:auto">T-${String(d.seq).padStart(3,"0")}</span>`:""}</div>
       <div class="modal-b">
+        ${ro?`<div class="banner"><span>ℹ️</span><span>${esc(t("roNote"))}</span></div>`+CM_BLOCK:""}
         <div class="field">
           <label for="fDesc">${esc(t("fDesc"))}</label>
           <textarea class="inp" id="fDesc" rows="2" placeholder="${esc(t("fDescPh"))}" ${memberLock?"disabled":""}>${esc(d.description)}</textarea>
@@ -860,20 +915,19 @@ function openTask(id){
           <div class="field"><label for="fTime">${esc(t("colTime"))}</label>
             <input class="inp" id="fTime" type="time" value="${esc(d.timeAssigned||"")}" ${memberLock?"disabled":""}></div>
           <div class="field"><label for="fDue">${esc(t("colDue"))}</label>
-            <input class="inp" id="fDue" type="date" value="${esc(d.dueDate||"")}">
+            <input class="inp" id="fDue" type="date" value="${esc(d.dueDate||"")}"${lock}>
             <div class="help" id="dueHelp"></div></div>
           <div class="field"><label for="fStatus">${esc(t("colStatus"))}</label>
-            <select class="inp" id="fStatus" onchange="syncDone()">${opt(STATUSES,d.status,"status")}</select></div>
+            <select class="inp" id="fStatus" onchange="syncDone()"${lock}>${opt(STATUSES,d.status,"status")}</select></div>
           <div class="field"><label for="fDone">${esc(t("colDone"))}</label>
-            <input class="inp" id="fDone" type="date" value="${esc(d.completionDate||"")}"></div>
+            <input class="inp" id="fDone" type="date" value="${esc(d.completionDate||"")}"${lock}></div>
         </div>
-        <div class="field"><label for="fRem">${esc(t("colRemarks"))}</label>
-          <textarea class="inp" id="fRem" rows="2">${esc(d.remarks||"")}</textarea></div>
+        ${ro?"":CM_BLOCK}
       </div>
       <div class="modal-f">
         ${!isNew && (ME.role==="admin"||ME.role==="manager") ? `<button class="btn btn-danger btn-sm" onclick="delTask('${d.id}')">${esc(t("del"))}</button><div class="grow"></div>`:""}
-        <button class="btn btn-ghost" onclick="closeModal()">${esc(t("cancel"))}</button>
-        <button class="btn btn-primary" onclick="saveTask('${isNew?"":d.id}')">${esc(t("save"))}</button>
+        <button class="btn btn-ghost" onclick="closeModal()">${esc(t(ro?"close":"cancel"))}</button>
+        ${ro?"":`<button class="btn btn-primary" onclick="saveTask('${isNew?"":d.id}')">${esc(t("save"))}</button>`}
       </div>
     </div>
   </div>`;
@@ -900,10 +954,60 @@ function syncDone(){
   if(st==="Completed" && !done.value) done.value = todayISO();
   if(st!=="Completed") done.value = "";
 }
+function threadHTML(x){
+  const list = commentsOf(x);
+  if(!list.length) return `<div class="cm-empty">${esc(t("noComments"))}</div>`;
+  return list.map(c=>`
+    <div class="cm">
+      <div class="cm-head">
+        <span class="cm-who">${c.legacy ? esc(t("legacyNote")) : esc(c.name||"—")}</span>
+        <span class="cm-when">${esc(fmtWhen(c.at))}</span>
+        ${canDelComment(c)?`<button class="cm-del" title="${esc(t("del"))}" onclick="delComment('${x.id}','${c.id}')">✕</button>`:""}
+      </div>
+      <div class="cm-body">${esc(c.text)}</div>
+    </div>`).join("");
+}
+async function addComment(taskId){
+  const box = document.getElementById("fNew");
+  const text = box.value.trim();
+  if(!text) { box.focus(); return; }
+  const task = DB.tasks.find(v=>v.id===taskId);
+  if(!task) return;
+  if(!Array.isArray(task.comments)) task.comments = [];
+  task.comments.push({
+    id:"c_"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+    uid:ME.id, name:ME.name, text, at:Date.now()
+  });
+  task.updatedAt = Date.now();
+  await Store.putTask(task);
+  box.value = "";
+  const th = document.getElementById("thread");
+  if(th){ th.innerHTML = threadHTML(task); th.scrollTop = th.scrollHeight; }
+  render(); toast(t("commentAdded"));
+}
+async function delComment(taskId, commentId){
+  if(!confirm(t("delComment"))) return;
+  const task = DB.tasks.find(v=>v.id===taskId);
+  if(!task || !Array.isArray(task.comments)) return;
+  task.comments = task.comments.filter(c=>c.id!==commentId);
+  task.updatedAt = Date.now();
+  await Store.putTask(task);
+  const th = document.getElementById("thread");
+  if(th) th.innerHTML = threadHTML(task);
+  render(); toast(t("deleted"));
+}
 function closeModal(){ document.getElementById("modalRoot").innerHTML=""; }
 
+function firstComment(){
+  const el = document.getElementById("fFirst");
+  const text = el ? el.value.trim() : "";
+  if(!text) return [];
+  return [{ id:"c_"+Date.now().toString(36), uid:ME.id, name:ME.name, text, at:Date.now() }];
+}
 async function saveTask(id){
   const g = i => document.getElementById(i);
+  const prev = id ? DB.tasks.find(v=>v.id===id) : null;
+  if(prev && !canEdit(prev)){ toast(t("noPerm")); return; }
   const desc = g("fDesc").value.trim();
   if(!desc){ g("fDesc").focus(); g("fDesc").style.borderColor="var(--brand)"; return; }
   const existing = id ? DB.tasks.find(x=>x.id===id) : null;
@@ -914,7 +1018,9 @@ async function saveTask(id){
     assignedBy: g("fBy").value, assignedTo: g("fTo").value,
     dateAssigned: g("fDate").value, timeAssigned: g("fTime").value,
     dueDate: g("fDue").value, completionDate: g("fDone").value,
-    status: g("fStatus").value, remarks: g("fRem").value.trim(),
+    status: g("fStatus").value,
+    remarks: existing ? (existing.remarks||"") : "",
+    comments: existing ? (existing.comments||[]) : firstComment(),
     createdBy: existing ? existing.createdBy : ME.id,
     createdAt: existing ? existing.createdAt : Date.now(),
     updatedAt: Date.now()
@@ -1071,7 +1177,8 @@ async function delUser(id){
 /* ---------- 15. EXPORT / IMPORT ---------- */
 function exportCSV(){
   const head = ["N","Type","Priority","Description","Assigned By","Assigned To","Date Assigned","Time Assigned","Due Date","Completion Date","Status","Remarks"];
-  const rows = filtered().map(x=>[x.seq,x.type,x.priority,x.description,x.assignedBy,x.assignedTo,x.dateAssigned,x.timeAssigned,x.dueDate,x.completionDate,x.status,x.remarks]);
+  const thread = x => commentsOf(x).map(c=>(c.legacy?"":"["+c.name+" "+fmtWhen(c.at)+"] ")+c.text).join("\n");
+  const rows = filtered().map(x=>[x.seq,x.type,x.priority,x.description,x.assignedBy,x.assignedTo,x.dateAssigned,x.timeAssigned,x.dueDate,x.completionDate,x.status,thread(x)]);
   const q = v => `"${String(v??"").replace(/"/g,'""')}"`;
   const csv = "\uFEFF" + [head.map(q).join(","), ...rows.map(r=>r.map(q).join(","))].join("\r\n");
   download(new Blob([csv],{type:"text/csv;charset=utf-8"}), `Task_Management_${todayISO()}.csv`);
