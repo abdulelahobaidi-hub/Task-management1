@@ -205,6 +205,7 @@ tbody tr:hover{background:#F8FAFB}
 .toast{position:fixed;inset-block-end:22px;inset-inline-start:50%;transform:translateX(50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;z-index:120;box-shadow:0 8px 24px rgba(16,29,41,.3)}
 html[dir="ltr"] .toast{transform:translateX(-50%)}
 .banner{background:#FFF8E7;border:1px solid #EBD9AC;color:#7A5B10;padding:9px 13px;border-radius:var(--r);font-size:12.5px;margin-bottom:16px;display:flex;gap:9px;align-items:flex-start}
+.banner.ok{background:#EBF7F0;border-color:#B4DCC6;color:#15613B}
 @media(max-width:760px){
   .topbar{padding:0 12px;gap:9px}
   .tb-sub{display:none}
@@ -383,7 +384,8 @@ const T = {
     backup:"النسخ الاحتياطي", backupText:"نزّل نسخة من كل البيانات، أو استعدها لاحقاً.",
     exportJson:"تنزيل نسخة (JSON)", importJson:"استعادة من ملف", imported:"تمت الاستعادة",
     importBad:"الملف غير صالح.",
-    storageNote:"البيانات محفوظة الآن في متصفح هذا الجهاز فقط. عند الربط بـ Firebase ستُشارك بين الجميع مباشرة.",
+    storageNote:"البيانات محفوظة الآن في متصفح هذا الجهاز فقط ولا يراها بقية الفريق. راجع README لربط Firebase.",
+    storageLive:"متصل بـ Firebase — البيانات مشتركة بين كل أعضاء الفريق، وأي تعديل يظهر لدى الجميع مباشرة.",
     fName:"الاسم بالإنجليزية", fNameAr:"الاسم بالعربية", cannotDelSelf:"لا يمكنك حذف حسابك.",
     lastAdmin:"يجب أن يبقى مسؤول واحد على الأقل.",
     late:"متأخرة", tasksWord:"مهمة",
@@ -438,7 +440,8 @@ const T = {
     backup:"Backup", backupText:"Download a copy of all data, or restore it later.",
     exportJson:"Download backup (JSON)", importJson:"Restore from file", imported:"Restored",
     importBad:"That file isn't valid.",
-    storageNote:"Data is currently stored in this browser only. Once connected to Firebase it will be shared live with everyone.",
+    storageNote:"Data is stored in this browser only — the rest of the team can't see it. See README to connect Firebase.",
+    storageLive:"Connected to Firebase — data is shared with the whole team, and every change shows up for everyone straight away.",
     fName:"Name (English)", fNameAr:"Name (Arabic)", cannotDelSelf:"You can't delete your own account.",
     lastAdmin:"At least one administrator must remain.",
     late:"Overdue", tasksWord:"tasks",
@@ -965,7 +968,9 @@ function viewSettings(){
   const isAdmin = ME.role==="admin";
   return `
   <div class="page-head"><div><h2>${esc(t("setTitle"))}</h2><p>${esc(t("setSub"))}</p></div></div>
-  <div class="banner"><span>ℹ️</span><span>${esc(t("storageNote"))}</span></div>
+  ${Store.kind==="firebase"
+    ? `<div class="banner ok"><span>●</span><span>${esc(t("storageLive"))}</span></div>`
+    : `<div class="banner"><span>ℹ️</span><span>${esc(t("storageNote"))}</span></div>`}
   <div class="ref-tables">
     <div class="card">
       <div class="card-h"><h3>${esc(t("changePw"))}</h3></div>
