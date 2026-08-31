@@ -94,7 +94,7 @@ window.RemoteAuthFactory = async () => {
 /* ------------------------------------------------------------- STORAGE */
 window.RemoteStoreFactory = async (ctx) => {
   const fb = await loadSDK();
-  const { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, writeBatch } = fb.store;
+  const { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, getDoc, writeBatch } = fb.store;
   const db = fb.db;
 
   if(!fb.authInstance.currentUser)
@@ -102,6 +102,9 @@ window.RemoteStoreFactory = async (ctx) => {
 
   const tasksCol = collection(db, "boards", BOARD, "tasks");
   const usersCol = collection(db, "boards", BOARD, "users");
+  /* Board settings live here rather than in the source file, so the
+     notification endpoint never lands in a public repository. */
+  const cfgDoc   = doc(db, "boards", BOARD, "meta", "settings");
   let onChangeCb = null;
 
   function pull(snapshot, key){
@@ -148,8 +151,16 @@ window.RemoteStoreFactory = async (ctx) => {
       DB.seq   = DB.tasks.reduce((m, x) => Math.max(m, x.seq || 0), 0);
       DB.seeded = true;
 
+      try{
+        const c = await getDoc(cfgDoc);
+        DB.config = c.exists() ? c.data() : { notifyUrl:"", notifyOn:true };
+      }catch(e){ DB.config = { notifyUrl:"", notifyOn:true }; }
+
       onSnapshot(tasksCol, s => pull(s, "tasks"));
       onSnapshot(usersCol, s => pull(s, "users"));
+      onSnapshot(cfgDoc, s => {
+        ctx.getDB().config = s.exists() ? s.data() : { notifyUrl:"", notifyOn:true };
+      });
     },
 
     async flush(){ /* every write is already saved individually */ },
@@ -165,6 +176,12 @@ window.RemoteStoreFactory = async (ctx) => {
       const DB = ctx.getDB();
       DB.tasks = DB.tasks.filter(x => x.id !== id);
       await deleteDoc(doc(tasksCol, id));
+    },
+
+    async putConfig(cfg){
+      const DB = ctx.getDB();
+      DB.config = cfg;
+      await setDoc(cfgDoc, cfg);
     },
 
     async putUser(u){

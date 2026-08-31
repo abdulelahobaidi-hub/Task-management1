@@ -629,6 +629,15 @@ const T = {
     emailHelp:"بريد Google الذي يدخل به هذا الشخص. بدونه لا يستطيع الدخول.",
     emailTaken:"هذا البريد مسجّل لشخص آخر.",
     account:"حسابك", accountNote:"الدخول عبر حساب Google. لا تُحفظ كلمات مرور في النظام.",
+    notify:"تنبيهات البريد", notifyOn:"إرسال بريد عند إسناد مهمة",
+    notifyUrl:"رابط خدمة الإرسال", notifyUrlPh:"https://script.google.com/…/exec",
+    notifyHelp:"رابط سكربت Google الذي يرسل الرسائل. يُحفظ في قاعدة البيانات لا في ملفات الموقع. خطوات إنشائه في ملف notify.gs.",
+    sendTest:"إرسال رسالة تجربة", testSent:"أُرسلت — تحقّق من بريدك",
+    testFailed:"تعذّر الوصول لخدمة الإرسال", needUrl:"أضف رابط الخدمة أولاً",
+    needOwnEmail:"لا يوجد بريد مسجّل لحسابك",
+    testSubject:"رسالة تجربة — نظام إدارة المهام",
+    testTaskDesc:"هذه رسالة تجربة للتأكد من عمل التنبيهات",
+    noNotify:"التنبيهات متوقفة — لن يصل بريد عند الإسناد.",
     lastAdmin:"يجب أن يبقى مسؤول واحد على الأقل.",
     late:"متأخرة", tasksWord:"مهمة",
     comments:"التعليقات", addComment:"إضافة", commentPh:"اكتب تحديثاً على هذه المهمة…",
@@ -703,6 +712,15 @@ const T = {
     emailHelp:"The Google address this person signs in with. Without it they can't get in.",
     emailTaken:"That address already belongs to someone else.",
     account:"Your account", accountNote:"You sign in through Google. No passwords are kept in the system.",
+    notify:"Email notifications", notifyOn:"Email the assignee when a task is assigned",
+    notifyUrl:"Sending service URL", notifyUrlPh:"https://script.google.com/…/exec",
+    notifyHelp:"The Google Script that sends the mail. It is kept in the database, not in the site files. Setup steps are in notify.gs.",
+    sendTest:"Send a test email", testSent:"Sent — check your inbox",
+    testFailed:"Couldn't reach the sending service", needUrl:"Add the service URL first",
+    needOwnEmail:"Your account has no address on file",
+    testSubject:"Test — Task Management System",
+    testTaskDesc:"A test message to confirm notifications work",
+    noNotify:"Notifications are off — nobody is emailed on assignment.",
     lastAdmin:"At least one administrator must remain.",
     late:"Overdue", tasksWord:"tasks",
     comments:"Comments", addComment:"Add", commentPh:"Write an update on this task…",
@@ -745,7 +763,7 @@ const REF_MEANING = {
 
 /* ---------- 4. STATE ---------- */
 let LANG = localStorage.getItem("tms_lang") || "ar";
-let DB = {users:[], tasks:[], seq:0};
+let DB = {users:[], tasks:[], seq:0, config:{notifyUrl:"", notifyOn:true}};
 let ME = null;
 let AUTH = null;          /* Google sign-in, when firebase-adapter.js is loaded */
 let GOOGLE_USER = null;
@@ -769,6 +787,7 @@ const LocalStore = {
     }catch(e){ console.warn("Could not read saved data:", e); }
     if(!DB.users || !DB.users.length) DB.users = DEFAULT_USERS.map(u=>({...u, pw:hash(DEFAULT_PW)}));
     if(!DB.tasks) DB.tasks = [];
+    if(!DB.config) DB.config = { notifyUrl:"", notifyOn:true };
     if(typeof DB.seq !== "number") DB.seq = DB.tasks.reduce((m,x)=>Math.max(m,x.seq||0),0);
     if(!DB.seeded){ seedExample(); DB.seeded = true; }
     await this.flush();
@@ -778,6 +797,7 @@ const LocalStore = {
     catch(e){ console.warn("Could not save. Data will be lost when the tab closes.", e); }
   },
   async putTask(task){ const i = DB.tasks.findIndex(x=>x.id===task.id); if(i<0) DB.tasks.push(task); else DB.tasks[i]=task; await this.flush(); },
+  async putConfig(cfg){ DB.config = cfg; await this.flush(); },
   async removeTask(id){ DB.tasks = DB.tasks.filter(x=>x.id!==id); await this.flush(); },
   async putUser(u){ const i = DB.users.findIndex(x=>x.id===u.id); if(i<0) DB.users.push(u); else DB.users[i]=u; await this.flush(); },
   async removeUser(id){ DB.users = DB.users.filter(x=>x.id!==id); await this.flush(); },
@@ -862,6 +882,72 @@ function remCell(x){
        + (c.length>1 ? '<span class="rem-n">'+c.length+'</span>' : '');
 }
 function canDelComment(c){ return !c.legacy && (c.uid===ME.id || ME.role==="admin" || ME.role==="manager"); }
+/* ---------- assignment emails ----------
+   Posted to a Google Apps Script that sends from the department's own
+   Gmail. mode:"no-cors" means the reply can't be read, so a failure here
+   is logged and never blocks saving the task. */
+function notifyHTML(task, isNew){
+  const site = location.origin + location.pathname;
+  const row = (k,v)=>`<tr><td style="padding:6px 14px 6px 0;color:#61748A;font-size:13px;white-space:nowrap">${esc(k)}</td>
+      <td style="padding:6px 0;color:#131C25;font-size:14px;font-weight:600">${esc(v)}</td></tr>`;
+  return `<div dir="rtl" style="font-family:'Segoe UI',Tahoma,sans-serif;background:#E9EDF1;padding:24px">
+    <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #D3DBE3;border-radius:10px;overflow:hidden">
+      <div style="background:#101720;color:#fff;padding:16px 20px">
+        <div style="font-size:15px;font-weight:600">${esc(isNew?"مهمة جديدة مُسندة إليك":"مهمة أُعيد إسنادها إليك")}</div>
+        <div style="font-size:12px;color:#8CA2B6;margin-top:2px">رؤى المدينة — سوبربلوك 5 · قسم المشتريات</div>
+      </div>
+      <div style="padding:20px">
+        <div style="font-size:16px;font-weight:600;color:#131C25;line-height:1.6;margin-bottom:16px">${esc(task.description)}</div>
+        <table style="border-collapse:collapse;width:100%">
+          ${row("رقم المهمة","T-"+String(task.seq).padStart(3,"0"))}
+          ${row("مُسندة من", task.assignedBy||"—")}
+          ${row("الأولوية", lbl("priority",task.priority))}
+          ${row("النوع", lbl("type",task.type))}
+          ${row("تاريخ الاستحقاق", task.dueDate?fmtDate(task.dueDate):"—")}
+        </table>
+        <a href="${esc(site)}" style="display:inline-block;margin-top:20px;background:#C8102E;color:#fff;
+           text-decoration:none;padding:11px 20px;border-radius:7px;font-size:14px;font-weight:600">فتح المهمة</a>
+      </div>
+      <div style="padding:12px 20px;background:#F5F7F9;border-top:1px solid #E6EBF0;color:#61748A;font-size:11.5px">
+        رسالة آلية من نظام إدارة المهام. لا تردّ عليها.
+      </div>
+    </div></div>`;
+}
+async function postMail(to, subject, html){
+  const cfg = DB.config || {};
+  if(!cfg.notifyUrl) return false;
+  try{
+    await fetch(cfg.notifyUrl, {
+      method:"POST", mode:"no-cors",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body: JSON.stringify({ to, subject, html })
+    });
+    return true;
+  }catch(e){
+    console.warn("Task Management: could not reach the notification service.", e);
+    return false;
+  }
+}
+async function notifyAssignment(task, isNew){
+  const cfg = DB.config || {};
+  if(!cfg.notifyUrl || cfg.notifyOn === false) return;
+  const u = DB.users.find(x => x.name === task.assignedTo);
+  if(!u || !u.email) return;
+  if(ME && u.id === ME.id) return;          /* no need to email yourself */
+  await postMail(
+    u.email,
+    (isNew ? "مهمة جديدة: " : "مهمة أُعيد إسنادها: ") + task.description.slice(0,70),
+    notifyHTML(task, isNew)
+  );
+}
+async function sendTestEmail(){
+  if(!(DB.config||{}).notifyUrl){ toast(t("needUrl")); return; }
+  if(!ME.email){ toast(t("needOwnEmail")); return; }
+  const sample = { seq:0, description:t("testTaskDesc"), assignedBy:ME.name,
+                   priority:"P3 - 2-3 Days", type:"Operational", dueDate:todayISO() };
+  const ok = await postMail(ME.email, t("testSubject"), notifyHTML(sample, true));
+  toast(ok ? t("testSent") : t("testFailed"));
+}
 function toast(msg){
   const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
   document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
@@ -1336,6 +1422,7 @@ async function saveTask(id){
   };
   await Store.putTask(task);
   if(!existing) await Store.flush?.();
+  if(!existing || existing.assignedTo !== task.assignedTo) notifyAssignment(task, !existing);
   closeModal(); render(); toast(t("saved"));
 }
 async function delTask(id){
@@ -1420,6 +1507,23 @@ function viewSettings(){
   </div>
   ${isAdmin?`
   <div class="card" style="margin-top:16px">
+    <div class="card-h"><h3>${esc(t("notify"))}</h3>
+      <span class="note">${esc((DB.config||{}).notifyUrl ? "" : t("noNotify"))}</span></div>
+    <div class="card-b">
+      <div class="field"><label for="nUrl">${esc(t("notifyUrl"))}</label>
+        <input class="inp" id="nUrl" type="url" dir="ltr" placeholder="${esc(t("notifyUrlPh"))}"
+               value="${esc((DB.config||{}).notifyUrl||"")}">
+        <div class="help">${esc(t("notifyHelp"))}</div></div>
+      <label class="toggle" style="width:100%;margin-bottom:12px">
+        <input type="checkbox" id="nOn" ${((DB.config||{}).notifyOn!==false)?"checked":""}> ${esc(t("notifyOn"))}</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="saveNotify()">${esc(t("save"))}</button>
+        <button class="btn btn-ghost btn-sm" onclick="sendTestEmail()">${esc(t("sendTest"))}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
     <div class="card-h"><h3>${esc(t("users"))}</h3><div class="grow"></div>
       <button class="btn btn-ghost btn-sm" onclick="openUser()">+ ${esc(t("addUser"))}</button></div>
     <div class="tw"><table>
@@ -1437,6 +1541,14 @@ function viewSettings(){
       </tr>`).join("")}</tbody>
     </table></div>
   </div>`:""}`;
+}
+async function saveNotify(){
+  const cfg = {
+    notifyUrl: (document.getElementById("nUrl").value||"").trim(),
+    notifyOn:  document.getElementById("nOn").checked
+  };
+  await Store.putConfig(cfg);
+  render(); toast(t("saved"));
 }
 async function changePw(){
   const o=document.getElementById("pwOld").value, n=document.getElementById("pwNew").value;
