@@ -1,0 +1,15 @@
+{
+  "name": "نظام إدارة المهام — قسم المشتريات",
+  "short_name": "Procurement",
+  "description": "متابعة مهام قسم المشتريات — مشروع رؤى المدينة، سوبربلوك 5",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#E9EDF1",
+  "theme_color": "#101720",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
