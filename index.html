@@ -360,6 +360,16 @@ html[dir="ltr"] .toast{transform:translateX(-50%)}
   border-radius:var(--r-s);font-size:12.5px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start;
 }
 .banner.ok{background:#ECF7F1;border-color:#B0DDC5;color:#116340}
+.btn-google{background:#fff;border:1px solid var(--line);color:var(--text);gap:10px;font-weight:500}
+.btn-google:hover{background:var(--wash);border-color:#BFCBD6}
+.btn-google svg{flex:0 0 auto}
+.btn-google:disabled{opacity:.6;cursor:default}
+.em{font-family:var(--mono);font-size:11.5px;color:var(--text)}
+.em-no{font-size:11.5px;color:#A7B6C4}
+.acct{display:flex;align-items:center;gap:12px}
+.acct .avatar{width:40px;height:40px;font-size:14px}
+.acct-n{font-weight:500;font-size:14px}
+.acct-e{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:1px}
 
 /* ---------------- MOBILE ---------------- */
 @media(max-width:820px){
@@ -460,21 +470,32 @@ html[dir="ltr"] .toast{transform:translateX(-50%)}
       <div style="display:flex;justify-content:flex-end;margin-bottom:18px">
         <button class="btn btn-ghost btn-sm" onclick="toggleLang()" id="langBtn2">English</button>
       </div>
-      <h2 data-i18n="signIn"></h2>
-      <p class="sub" data-i18n="signInSub"></p>
+      <h2 id="lgTitle"></h2>
+      <p class="sub" id="lgSub"></p>
       <div id="loginErr" class="err" hidden></div>
-      <form onsubmit="doLogin(event)">
-        <div class="field">
-          <label for="lgUser" data-i18n="username"></label>
-          <select class="inp" id="lgUser"></select>
-        </div>
-        <div class="field">
-          <label for="lgPass" data-i18n="password"></label>
-          <input class="inp" id="lgPass" type="password" autocomplete="current-password" required>
-        </div>
-        <button class="btn btn-primary btn-block" type="submit" data-i18n="signInBtn"></button>
-      </form>
-      <div class="hint" id="loginHint"></div>
+
+      <div id="googleBox" hidden>
+        <button class="btn btn-google btn-block" onclick="googleSignIn()" id="gBtn">
+          <svg viewBox="0 0 18 18" width="17" height="17" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.91c1.7-1.57 2.69-3.88 2.69-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.26c-.81.54-1.84.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.96 10.71a5.41 5.41 0 0 1 0-3.42V4.96H.96a9 9 0 0 0 0 8.08l3-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.96l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/></svg>
+          <span id="gLabel"></span>
+        </button>
+        <div class="hint" id="gHint"></div>
+      </div>
+
+      <div id="pwBox" hidden>
+        <form onsubmit="doLogin(event)">
+          <div class="field">
+            <label for="lgUser" data-i18n="username"></label>
+            <select class="inp" id="lgUser"></select>
+          </div>
+          <div class="field">
+            <label for="lgPass" data-i18n="password"></label>
+            <input class="inp" id="lgPass" type="password" autocomplete="current-password" required>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit" data-i18n="signInBtn"></button>
+        </form>
+        <div class="hint" id="loginHint"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -546,6 +567,15 @@ const T = {
     statTasks:"إجمالي المهام", statOpen:"مهام مفتوحة", statTeam:"أعضاء الفريق",
     brandFoot:"للاستخدام الداخلي في قسم المشتريات.",
     signIn:"تسجيل الدخول", signInSub:"اختر اسمك وأدخل كلمة المرور.",
+    signInGoogle:"المتابعة بحساب Google", signInGoogleSub:"ادخل بحساب Google الخاص بعملك.",
+    googleHint:"يُسمح بالدخول للحسابات المسجّلة في القسم فقط. إن لم يقبل بريدك، اطلب من مسؤول النظام إضافته.",
+    notAllowed:"هذا البريد غير مسجّل في القسم:",
+    notAllowedHelp:"اطلب من مسؤول النظام إضافة بريدك إلى حسابك في النظام، ثم أعد المحاولة.",
+    tryAnother:"تسجيل الدخول بحساب آخر",
+    popupBlocked:"منع المتصفح نافذة الدخول. اسمح بالنوافذ المنبثقة لهذا الموقع ثم أعد المحاولة.",
+    signInFailed:"تعذّر تسجيل الدخول.",
+    fEmail:"بريد Google", emailPh:"name@example.com", noEmail:"لم يُسجَّل بعد",
+    colEmail:"البريد", signingIn:"جارٍ الدخول…",
     username:"المستخدم", password:"كلمة المرور", signInBtn:"دخول",
     wrongPw:"كلمة المرور غير صحيحة.",
     hintText:"كلمة المرور الافتراضية لكل مستخدم: <code>1234</code> — غيّرها من الإعدادات بعد أول دخول.",
@@ -578,7 +608,7 @@ const T = {
     refPrio:"الأولويات", refType:"أنواع المهام", refStatus:"الحالات",
     cMeaning:"المعنى", cTarget:"المستهدف", cDays:"عدد الأيام",
     p5note:"P5 ليس له موعد محدد، لذا يُدخل تاريخ الاستحقاق يدوياً.",
-    setTitle:"الإعدادات", setSub:"كلمة المرور، المستخدمون، والنسخ الاحتياطي.",
+    setTitle:"الإعدادات", setSub:"حسابك، المستخدمون، والنسخ الاحتياطي.",
     changePw:"تغيير كلمة المرور", oldPw:"كلمة المرور الحالية", newPw:"كلمة المرور الجديدة",
     pwChanged:"تم تغيير كلمة المرور", pwWrong:"كلمة المرور الحالية غير صحيحة", pwShort:"استخدم 4 خانات على الأقل",
     users:"المستخدمون", addUser:"إضافة مستخدم", cName:"الاسم", cRole:"الصلاحية", cReset:"",
@@ -589,6 +619,9 @@ const T = {
     storageNote:"البيانات محفوظة الآن في متصفح هذا الجهاز فقط ولا يراها بقية الفريق. راجع README لربط Firebase.",
     storageLive:"متصل بـ Firebase — البيانات مشتركة بين كل أعضاء الفريق، وأي تعديل يظهر لدى الجميع مباشرة.",
     fName:"الاسم بالإنجليزية", fNameAr:"الاسم بالعربية", cannotDelSelf:"لا يمكنك حذف حسابك.",
+    emailHelp:"بريد Google الذي يدخل به هذا الشخص. بدونه لا يستطيع الدخول.",
+    emailTaken:"هذا البريد مسجّل لشخص آخر.",
+    account:"حسابك", accountNote:"الدخول عبر حساب Google. لا تُحفظ كلمات مرور في النظام.",
     lastAdmin:"يجب أن يبقى مسؤول واحد على الأقل.",
     late:"متأخرة", tasksWord:"مهمة",
     comments:"التعليقات", addComment:"إضافة", commentPh:"اكتب تحديثاً على هذه المهمة…",
@@ -608,6 +641,15 @@ const T = {
     statTasks:"Total tasks", statOpen:"Open tasks", statTeam:"Team members",
     brandFoot:"Internal use — Procurement Department.",
     signIn:"Sign in", signInSub:"Pick your name and enter your password.",
+    signInGoogle:"Continue with Google", signInGoogleSub:"Sign in with your work Google account.",
+    googleHint:"Only accounts registered with the department can sign in. If yours is rejected, ask the administrator to add it.",
+    notAllowed:"This address isn't registered with the department:",
+    notAllowedHelp:"Ask the administrator to add your address to your account, then try again.",
+    tryAnother:"Sign in with a different account",
+    popupBlocked:"The browser blocked the sign-in window. Allow pop-ups for this site and try again.",
+    signInFailed:"Sign-in failed.",
+    fEmail:"Google address", emailPh:"name@example.com", noEmail:"Not set yet",
+    colEmail:"Address", signingIn:"Signing in…",
     username:"User", password:"Password", signInBtn:"Sign in",
     wrongPw:"Incorrect password.",
     hintText:"Default password for every user: <code>1234</code> — change it from Settings after your first sign-in.",
@@ -640,7 +682,7 @@ const T = {
     refPrio:"Priorities", refType:"Task types", refStatus:"Statuses",
     cMeaning:"Meaning", cTarget:"Target", cDays:"Target days",
     p5note:"P5 has no fixed target, so the due date is entered manually.",
-    setTitle:"Settings", setSub:"Password, users, and backups.",
+    setTitle:"Settings", setSub:"Your account, users, and backups.",
     changePw:"Change password", oldPw:"Current password", newPw:"New password",
     pwChanged:"Password changed", pwWrong:"Current password is incorrect", pwShort:"Use at least 4 characters",
     users:"Users", addUser:"Add user", cName:"Name", cRole:"Role", cReset:"",
@@ -651,6 +693,9 @@ const T = {
     storageNote:"Data is stored in this browser only — the rest of the team can't see it. See README to connect Firebase.",
     storageLive:"Connected to Firebase — data is shared with the whole team, and every change shows up for everyone straight away.",
     fName:"Name (English)", fNameAr:"Name (Arabic)", cannotDelSelf:"You can't delete your own account.",
+    emailHelp:"The Google address this person signs in with. Without it they can't get in.",
+    emailTaken:"That address already belongs to someone else.",
+    account:"Your account", accountNote:"You sign in through Google. No passwords are kept in the system.",
     lastAdmin:"At least one administrator must remain.",
     late:"Overdue", tasksWord:"tasks",
     comments:"Comments", addComment:"Add", commentPh:"Write an update on this task…",
@@ -695,6 +740,8 @@ const REF_MEANING = {
 let LANG = localStorage.getItem("tms_lang") || "ar";
 let DB = {users:[], tasks:[], seq:0};
 let ME = null;
+let AUTH = null;          /* Google sign-in, when firebase-adapter.js is loaded */
+let GOOGLE_USER = null;
 let TAB = "dash";
 let SORT = {key:"seq", dir:"desc"};
 let FILT = {q:"", to:"", st:"", pr:"", ty:"", mine:false, open:false};
@@ -770,6 +817,11 @@ function fmtDate(iso){
   const [y,m,d]=iso.split("-");
   return d+"/"+m+"/"+y;
 }
+function findUserByEmail(email){
+  const e = (email||"").toLowerCase().trim();
+  if(!e) return null;
+  return DB.users.find(u => (u.email||"").toLowerCase().trim() === e) || null;
+}
 function assignees(){ return DB.users.filter(u=>u.isAssignee).map(u=>u.name); }
 function assigners(){ const a=DB.users.filter(u=>u.isAssigner), b=DB.users.filter(u=>!u.isAssigner && u.role!=="member"); return [...a,...b].map(u=>u.name); }
 function userByName(n){ return DB.users.find(u=>u.name===n); }
@@ -822,14 +874,68 @@ function applyLang(){
 
 /* ---------- 8. LOGIN ---------- */
 function renderLogin(){
-  const sel = document.getElementById("lgUser");
-  const keep = sel.value;
-  sel.innerHTML = DB.users.map(u=>`<option value="${esc(u.id)}">${esc(displayName(u))} — ${esc(t("role"+u.role[0].toUpperCase()+u.role.slice(1)))}</option>`).join("");
-  if(keep) sel.value = keep;
+  const google = !!AUTH;
+  document.getElementById("googleBox").hidden = !google;
+  document.getElementById("pwBox").hidden = google;
+  document.getElementById("lgTitle").textContent = t(google ? "signInGoogle" : "signIn");
+  document.getElementById("lgSub").textContent   = t(google ? "signInGoogleSub" : "signInSub");
+  if(google){
+    document.getElementById("gLabel").textContent = t("signInGoogle");
+    document.getElementById("gHint").textContent  = t("googleHint");
+  } else {
+    const sel = document.getElementById("lgUser");
+    const keep = sel.value;
+    sel.innerHTML = DB.users.map(u=>`<option value="${esc(u.id)}">${esc(displayName(u))} — ${esc(t("role"+u.role[0].toUpperCase()+u.role.slice(1)))}</option>`).join("");
+    if(keep) sel.value = keep;
+  }
+  renderLoginStats();
+}
+function renderLoginStats(){
   document.getElementById("lgTasks").textContent = DB.tasks.length;
   document.getElementById("lgOpen").textContent = DB.tasks.filter(x=>x.status!=="Completed").length;
   document.getElementById("lgTeam").textContent = DB.users.length;
 }
+async function googleSignIn(){
+  const err = document.getElementById("loginErr");
+  const btn = document.getElementById("gBtn");
+  err.hidden = true;
+  btn.disabled = true;
+  document.getElementById("gLabel").textContent = t("signingIn");
+  try{
+    await AUTH.signIn();          /* onChange takes it from here */
+  }catch(ex){
+    const code = (ex && ex.code) || "";
+    if(code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request"){
+      /* the person backed out — say nothing */
+    } else if(code === "auth/popup-blocked"){
+      err.textContent = t("popupBlocked"); err.hidden = false;
+    } else {
+      err.textContent = t("signInFailed") + " " + (code || "");
+      err.hidden = false;
+      console.error("Google sign-in:", ex);
+    }
+  }
+  btn.disabled = false;
+  document.getElementById("gLabel").textContent = t("signInGoogle");
+}
+
+/* Signed in with Google, but the address is not on the team list. */
+function showNotAllowed(email){
+  const err = document.getElementById("loginErr");
+  err.innerHTML = `${esc(t("notAllowed"))} <b dir="ltr">${esc(email)}</b><br>${esc(t("notAllowedHelp"))}`;
+  err.hidden = false;
+  document.getElementById("gLabel").textContent = t("tryAnother");
+}
+
+function enterApp(user){
+  ME = user;
+  sessionStorage.setItem("tms_me", user.id);
+  document.getElementById("login").hidden = true;
+  document.getElementById("app").hidden = false;
+  FILT.mine = (user.role === "member");
+  renderShell(); render();
+}
+
 function doLogin(e){
   e.preventDefault();
   const id = document.getElementById("lgUser").value;
@@ -838,19 +944,16 @@ function doLogin(e){
   const err = document.getElementById("loginErr");
   if(!u || u.pw !== hash(pw)){ err.textContent = t("wrongPw"); err.hidden=false; return; }
   err.hidden = true;
-  ME = u;
-  sessionStorage.setItem("tms_me", u.id);
   document.getElementById("lgPass").value = "";
-  document.getElementById("login").hidden = true;
-  document.getElementById("app").hidden = false;
-  FILT.mine = (u.role==="member");
-  renderShell(); render();
+  enterApp(u);
 }
-function logout(){
-  ME=null; sessionStorage.removeItem("tms_me");
+async function logout(){
+  ME=null; GOOGLE_USER=null; sessionStorage.removeItem("tms_me");
   document.getElementById("app").hidden = true;
   document.getElementById("login").hidden = false;
+  document.getElementById("loginErr").hidden = true;
   renderLogin();
+  if(AUTH){ try{ await AUTH.signOut(); }catch(ex){ console.error(ex); } }
 }
 
 /* ---------- 9. SHELL ---------- */
@@ -1277,6 +1380,16 @@ function viewSettings(){
     ? `<div class="banner ok"><span>●</span><span>${esc(t("storageLive"))}</span></div>`
     : `<div class="banner"><span>ℹ️</span><span>${esc(t("storageNote"))}</span></div>`}
   <div class="ref-tables">
+    ${AUTH ? `
+    <div class="card">
+      <div class="card-h"><h3>${esc(t("account"))}</h3></div>
+      <div class="card-b">
+        <div class="acct"><div class="avatar">${esc(initials(ME.name))}</div>
+          <div><div class="acct-n">${esc(displayName(ME))}</div>
+               <div class="acct-e" dir="ltr">${esc((GOOGLE_USER&&GOOGLE_USER.email)||ME.email||"")}</div></div></div>
+        <p class="help" style="margin-top:12px">${esc(t("accountNote"))}</p>
+      </div>
+    </div>` : `
     <div class="card">
       <div class="card-h"><h3>${esc(t("changePw"))}</h3></div>
       <div class="card-b">
@@ -1284,7 +1397,7 @@ function viewSettings(){
         <div class="field"><label for="pwNew">${esc(t("newPw"))}</label><input class="inp" id="pwNew" type="password"></div>
         <button class="btn btn-primary btn-sm" onclick="changePw()">${esc(t("save"))}</button>
       </div>
-    </div>
+    </div>`}
     <div class="card">
       <div class="card-h"><h3>${esc(t("backup"))}</h3></div>
       <div class="card-b">
@@ -1303,13 +1416,14 @@ function viewSettings(){
     <div class="card-h"><h3>${esc(t("users"))}</h3><div class="grow"></div>
       <button class="btn btn-ghost btn-sm" onclick="openUser()">+ ${esc(t("addUser"))}</button></div>
     <div class="tw"><table>
-      <thead><tr><th>${esc(t("cName"))}</th><th>${esc(t("cRole"))}</th><th>${esc(t("canGet"))}</th><th></th></tr></thead>
+      <thead><tr><th>${esc(t("cName"))}</th><th>${esc(t("colEmail"))}</th><th>${esc(t("cRole"))}</th><th>${esc(t("canGet"))}</th><th></th></tr></thead>
       <tbody>${DB.users.map(u=>`<tr>
         <td><div class="wl-name"><div class="avatar">${esc(initials(u.name))}</div><span>${esc(u.name)}${u.nameAr?` · ${esc(u.nameAr)}`:""}</span></div></td>
+        <td>${u.email?`<span class="em" dir="ltr">${esc(u.email)}</span>`:`<span class="em-no">${esc(t("noEmail"))}</span>`}</td>
         <td><span class="tag">${esc(t("role"+u.role[0].toUpperCase()+u.role.slice(1)))}</span></td>
         <td>${u.isAssignee?"✓":"—"}</td>
         <td><div class="actions">
-          <button class="iconbtn" title="${esc(t("resetPw"))}" onclick="resetPw('${u.id}')">↺</button>
+          ${AUTH?"":`<button class="iconbtn" title="${esc(t("resetPw"))}" onclick="resetPw('${u.id}')">↺</button>`}
           <button class="iconbtn" onclick="openUser('${u.id}')">✎</button>
           <button class="iconbtn del" onclick="delUser('${u.id}')">✕</button>
         </div></td>
@@ -1337,6 +1451,9 @@ function openUser(id){
     <div class="modal-b">
       <div class="field"><label for="uName">${esc(t("fName"))}</label><input class="inp" id="uName" value="${esc(u.name)}"></div>
       <div class="field"><label for="uNameAr">${esc(t("fNameAr"))}</label><input class="inp" id="uNameAr" value="${esc(u.nameAr||"")}"></div>
+      <div class="field"><label for="uEmail">${esc(t("fEmail"))}</label>
+        <input class="inp" id="uEmail" type="email" dir="ltr" placeholder="${esc(t("emailPh"))}" value="${esc(u.email||"")}">
+        <div class="help">${esc(t("emailHelp"))}</div></div>
       <div class="field"><label for="uRole">${esc(t("cRole"))}</label><select class="inp" id="uRole">
         ${["admin","manager","member"].map(r=>`<option value="${r}" ${u.role===r?"selected":""}>${esc(t("role"+r[0].toUpperCase()+r.slice(1)))}</option>`).join("")}
       </select></div>
@@ -1359,8 +1476,11 @@ async function saveUser(id){
     role: document.getElementById("uRole").value,
     isAssignee: document.getElementById("uAssignee").checked,
     isAssigner: document.getElementById("uAssigner").checked,
+    email: (document.getElementById("uEmail").value||"").trim().toLowerCase(),
     pw: existing ? existing.pw : hash(DEFAULT_PW)
   };
+  const clash = DB.users.find(v => v.id !== u.id && u.email && (v.email||"").toLowerCase() === u.email);
+  if(clash){ toast(t("emailTaken")); return; }
   await Store.putUser(u);
   if(ME.id===u.id) ME=u;
   closeModal(); render(); toast(t("saved"));
@@ -1410,21 +1530,66 @@ function download(blob, filename){
 /* ---------- 16. BOOT ---------- */
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
 
-async function boot(){
-  /* If firebase-adapter.js is loaded it defines window.RemoteStoreFactory.
-     Module scripts run before DOMContentLoaded, so it is ready by now. */
-  if(window.RemoteStoreFactory){
-    try{
-      Store = await window.RemoteStoreFactory({
-        getDB:()=>DB, setDB:d=>{DB=d},
-        DEFAULT_USERS, DEFAULT_PW, hash, todayISO
-      });
+const STORE_CTX = () => ({ getDB:()=>DB, setDB:d=>{DB=d}, DEFAULT_USERS, DEFAULT_PW, hash, todayISO });
+
+/* Google account signed in: open the database, then match the address
+   against the team list. An address nobody owns does not get in. */
+let _opening = false;
+async function onGoogleUser(gu){
+  if(!gu){                       /* signed out */
+    GOOGLE_USER = null; ME = null;
+    document.getElementById("app").hidden = true;
+    document.getElementById("login").hidden = false;
+    renderLogin();
+    return;
+  }
+  if(_opening) return;
+  _opening = true;
+  GOOGLE_USER = gu;
+  try{
+    if(Store.kind !== "firebase"){
+      Store = await window.RemoteStoreFactory(STORE_CTX());
+      await Store.init();
+      Store.onChange(()=>{ if(ME) render(); else renderLogin(); });
       console.info("Task Management: connected to Firebase.");
+    }
+    const user = findUserByEmail(gu.email);
+    if(!user){
+      showNotAllowed(gu.email || "");
+      renderLoginStats();
+      _opening = false;
+      return;
+    }
+    enterApp(user);
+  }catch(e){
+    console.error("Task Management: could not open the shared database.", e);
+    const err = document.getElementById("loginErr");
+    err.textContent = t("signInFailed") + " " + (e && e.code ? e.code : "");
+    err.hidden = false;
+  }
+  _opening = false;
+}
+
+async function boot(){
+  /* firebase-adapter.js, when loaded, defines RemoteAuthFactory and
+     RemoteStoreFactory. Module scripts run before DOMContentLoaded. */
+  if(window.RemoteAuthFactory && window.RemoteStoreFactory){
+    try{
+      AUTH = await window.RemoteAuthFactory();
     }catch(e){
-      console.error("Task Management: Firebase unavailable, using this browser's local storage.", e);
-      Store = LocalStore;
+      console.error("Task Management: Google sign-in unavailable, falling back to this browser's local storage.", e);
+      AUTH = null;
     }
   }
+
+  if(AUTH){
+    applyLang();
+    const existing = await AUTH.ready();      /* restores a previous session */
+    AUTH.onChange(onGoogleUser);
+    if(!existing){ renderLogin(); renderLoginStats(); }
+    return;                                    /* onGoogleUser drives the rest */
+  }
+
   await Store.init();
   Store.onChange?.(()=>{ if(ME) render(); else renderLogin(); });
   applyLang();
