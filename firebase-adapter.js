@@ -35,8 +35,8 @@ const FIREBASE_CONFIG = {
 const BOOTSTRAP_ADMIN_EMAIL = "abdulelah.obaidi@gmail.com";
 
 /* Change this if you ever want a second, separate department board
-   in the same Firebase project (e.g. "logistics"). */
-const BOARD = "procurement";
+   in the same Firebase project (e.g. "pharmacy"). */
+const BOARD = "operations";
 
 let _fb = null;   /* loaded SDK modules, shared by auth and storage */
 
